@@ -1,23 +1,22 @@
-import logo from './logo.svg';
+/* global chrome */
+import { useState } from 'react';
 import './App.css';
+import KeyWords from './components/home/Keywords';
+import Home from './screens/home';
+
 
 function App() {
+
+  const [screen, setScreen] = useState("home")
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{
+      width : '100%',
+      height : '100%',
+      overflow : 'auto',
+    }}>
+      {screen === "home" && <Home setScreen={setScreen} />}
+      {screen === "keywords" && <KeyWords setScreen={setScreen}/>}
     </div>
   );
 }

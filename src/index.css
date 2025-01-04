@@ -7,7 +7,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html, body {
+  width: 300px; /* Set the desired width */
+  height: 550px; /* Set the desired height */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars */
+  background-color: #0f0f0f;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+body::-webkit-scrollbar {
+    display: none;
 }

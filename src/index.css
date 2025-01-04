@@ -16,6 +16,7 @@ html, body {
   background-color: #0f0f0f;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  overflow :hidden;
 }
 
 code {
@@ -26,3 +27,9 @@ code {
 body::-webkit-scrollbar {
     display: none;
 }
+
+
+::-webkit-scrollbar {
+    width: 0px; 
+}
+

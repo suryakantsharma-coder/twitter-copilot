@@ -13,7 +13,8 @@ function App() {
     <div style={{
       width : '100%',
       height : '100%',
-      overflow : 'auto',
+      overflowY: 'scroll',
+      overflowX: 'hidden'
     }}>
       {screen === "home" && <Home setScreen={setScreen} />}
       {screen === "keywords" && <KeyWords setScreen={setScreen}/>}

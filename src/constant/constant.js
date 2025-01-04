@@ -7,31 +7,31 @@ export const settingOptions = [
         },
         {
           name : "Shorts",
-          description : "Disble shorts videos from youtube.",
+          description : "Disable YouTube Shorts.",
           type : 'switch',
           action : false
         },
         {
           name : "Video Suggestions",
-          description : "Disble suggested videos from youtube.",
+          description : "Disable suggested videos on YouTube.",
           type : 'switch',
           action : false
         },
         {
           name : "Filter By Keywords.",
-          description : "Filter youtube feeds with your keywords and also hlep to improve your focus and viewing experience.",
+          description : "Filter YouTube feeds using your keywords to stay focused and improve your viewing experience.",
           type : 'switch',
           action : false
         },
         {
           name : "Keywords settings",
-          description : "Add and remove the keywords for filteration.",
+          description : "Add or remove keywords to customize your feed.",
           type : 'btn',
           action : false
         },
         {
           name : "clear settings",
-          description : "Revert your changes.",
+          description : "Undo your changes.",
           type : 'btn',
           action : false
         }
@@ -40,7 +40,7 @@ export const settingOptions = [
 
  export  const startOption = [ {
           name : "YT Active",
-          description : "Activate is Extension activated.",
+          description : "Activate this extension.",
           type : 'switch',
           action : true
         },]

@@ -507,7 +507,6 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
     const throttleTime = 200;
 
     const hideElementsByTagName = (classNames, keywords) => {
-      console.log("HIDE_ELEMNT_BY_TAG_NAME")
       const lowerCaseKeywords = keywords.map(keyword => keyword.toLowerCase());
   
       classNames.forEach((className) => {
@@ -557,25 +556,6 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 };
 
 
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-
-    window.toggleFullscreen = toggleFullscreen;
-
 
      observer = new MutationObserver(() => {
       const now = Date.now();
@@ -622,16 +602,6 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       }
     };
 
-    const hideElementsCheckByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-            if (item?.innerText?.toString()?.toLowerCase() == ("Nishkarsh Sharma")?.toLowerCase()) {
-                item.hidden = true
-            }
-        });
-      });
-    };
-
     const toggleFullscreen = () => {
       const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
       console.log({p : "fullscreen trigger"})
@@ -654,25 +624,19 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       if (now - lastExecution < throttleTime) return; 
       lastExecution = now;
 
+      console.log("OBSERVER_WORKS");
+      
       hideElementsByClass([
-       (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
-      (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
+        (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
+        (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
       ]);
 
-     (isShorts) && hideElementsByTagName([
-        'ytd-reel-shelf-renderer'
-      ])
-
+  
       (isSuggestion) && hideSuggestionElementsById(); //suggestions
 
-      // Skip video ads if they're playing
-      // const video = document.querySelector('video');
-      // if (video && document.querySelector('.ad-showing')) {
-      //   video.currentTime = video.duration; 
-      // }
+      (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
     });
 
-    // Start observing changes in the body
     observer.observe(document.body, { childList: true, subtree: true });
     console.log("Throttled observer is running.");
 };
@@ -747,78 +711,10 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
     if (changes?.setting?.newValue) {
       Operations(changes?.setting?.newValue);
-      // const setting = JSON.parse(changes?.setting?.newValue);
-      // let isShorts = false;
-      // let isSuggestion = false;
-
-      // setting.map((item) => {
-      //   if (item?.name?.toString()?.toLowerCase() == "shorts") {
-      //     isShorts = item?.action;
-      //   } else if (item?.name?.toString()?.toLowerCase() == "video suggestions") {
-      //     isSuggestion = item?.action;
-      //   }
-      // })
-
-      // console.log({
-      //   isShorts,
-      //   isSuggestion
-      // })
-
-      // CUSTOM_PARTS(isShorts, isSuggestion)
-
     }
 });
 
 
 
-// Listen for messages from the React UI
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // if (observer) 
-    //     REMOVE_SCRIPT()
 
-    console.log({message})
-    if (message.action === events[0]) {
-        // AD_SHORTS_SUGGESTIONS();
-        SHORTS();
-        FILTER_CONTENT_WITH_KEYWORDS();
-        console.log("AD_SHORTS_SUGGESIONS");
-        sendResponse({ success: true });
-    } else
-    if (message.action === events[1]) {
-        AD_SUGGESTIONS();
-        console.log("AD_SUGGESIONS");
-        sendResponse({ success: true });
-    } else
-    if (message.action === events[2]) {
-        AD_SHORTS();
-        console.log("AD_SHORTS");
-        sendResponse({ success: true });
-    } else
-    if (message.action === events[3]) {
-        console.log("SHORTS_SUGGESTIONS");
-        SHORTS_SUGGESTIONS();
-        sendResponse({ success: true });
-    } else 
-    if (message.action === events[4]){
-        console.log("REMOVE_SCRIPT");
-        REMOVE_SCRIPT();
-        sendResponse({ success: true });
-    } else 
-    if (message.action === events[5]){
-        console.log("AD");
-        AD();
-        sendResponse({ success: true });
-    } else 
-    if (message.action === events[6]){
-        console.log("SHORTS");
-        FILTER_CONTENT_WITH_KEYWORDS();
-        SHORTS();
-        sendResponse({ success: true });
-    } else 
-    if (message.action === events[7]){
-        console.log("SUGGESTIONS");
-        SUGGESTIONS();
-      sendResponse({ success: true });
-    }
-});
   

@@ -32,7 +32,8 @@ const SettingItem = ({
               }}
               >
                 <div style={{
-                  width : "60%"
+                  width : "60%",
+                  cursor : "pointer"
                 }}>
               <h2 style={{
                 fontSize : 16,

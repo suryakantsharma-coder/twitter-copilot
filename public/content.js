@@ -1,5 +1,4 @@
 /* global chrome */
-console.log("Content script loaded");
 
 let observer = null;
 
@@ -36,43 +35,6 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
     });
   }
 
-  const checkYouTubeInput = (inputSelector, keywords) => {
-    const inputElements = document.getElementsByClassName(inputSelector);
-    console.log({inputElements});  // Debugging: Check if elements are correctly selected
-    
-    // Ensure that there is at least one element and select the first one
-    if (inputElements.length === 0) return;
-
-    const inputElement = inputElements[0];  // Select the first element
-
-    // inputElement.addEventListener('input', () => {  // Use 'input' for real-time tracking
-    //     const inputValue = inputElement.value.toLowerCase();
-    //     console.log('Input value:', inputValue);  // Debugging: Check the input value
-    //     const matchFound = keywords.some(keyword => inputValue.includes(keyword.toLowerCase()));
-        
-    //     if (matchFound) {
-    //         inputElement.form.submit();  // Submit the form if keyword matches
-    //     } else {
-    //         alert('Search restricted due to keyword restrictions.');  // Alert if no match found
-    //     }
-    // });
-
-    // Listen for 'keydown' event to detect Enter key
-  //   inputElement.addEventListener('keydown', (event) => {
-  //     if (event.key === 'Enter') {  // Check if the pressed key is Enter
-  //         const inputValue = inputElement.value.toLowerCase();
-  //         console.log('Input value:', inputValue);  // Debugging: Check the input value
-  //         const matchFound = keywords.some(keyword => inputValue.includes(keyword.toLowerCase()));
-          
-  //         if (matchFound) {
-  //             inputElement.form.submit();  // Submit the form if keyword matches
-  //         } else {
-  //             alert('Search restricted due to keyword restrictions.');  // Alert if no match found
-  //         }
-  //     }
-  // });
-};
-
 
 
      observer = new MutationObserver(() => {
@@ -82,14 +44,81 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 
       const ristrict_keyword = events || ['strange parts', 'INDIAN RAILWAYS FAN CLUB -by SATYA', 'yatri doctor', 'Destroyed Phone Restore', 'Mat Armstrong', 'JerryRigEverything', 'Linus Tech Tips', 'Joe HaTTab', 'Gyan Therapy'];
       hideElementsByTagName([ 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
-      // checkYouTubeInput('ytSearchboxComponentInput yt-searchbox-input title', ristrict_keyword);
     });
 
     // Start observing changes in the body
     observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
+    // console.log("Throttled observer is running.");
 
 }
+
+function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
+    let lastExecution = 0; 
+    const throttleTime = 200;
+
+    const hideElementsByClass = (classNames) => {
+      classNames.forEach((className) => {
+        Array.from(document.getElementsByClassName(className)).forEach((item) => {
+          item.hidden = true;
+        });
+      });
+    };
+
+    const hideElementsByTagName = (classNames) => {
+      classNames.forEach((className) => {
+        Array.from(document.getElementsByTagName(className)).forEach((item) => {
+          item.hidden = true;
+        });
+      });
+    };
+
+    function hideChildElementById(rootId, childId) {
+    const rootElement = document.getElementById(rootId);
+    if (rootElement) {
+        const childElement = rootElement.querySelector(`#${childId}`);
+        if (childElement) {
+            childElement.style.setProperty("display", "none", "important");
+        } else {
+            console.error(`Child element #${childId} not found within #${rootId}`);
+        }
+    } else {
+        console.error(`Root element #${rootId} not found`);
+    }
+    };
+
+
+    observer = new MutationObserver(() => {
+      const now = Date.now();
+      if (now - lastExecution < throttleTime) return; 
+      lastExecution = now;
+
+      hideElementsByClass([
+        'ad-container',
+        'video-ads',
+        'ytp-ad-module',
+      ]);
+
+      
+      hideElementsByClass([
+        (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
+        (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
+      ]);
+
+  
+      (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
+
+      (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
+
+      const video = document.querySelector('video');
+      if (video && document.querySelector('.ad-showing')) {
+        video.currentTime = video.duration; // Skip ad
+      }
+
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    // console.log("Throttled observer is running.");
+};
 
 function CUSTOM_PARTS (isShorts, isSuggestion) {
     let lastExecution = 0; 
@@ -125,27 +154,12 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
     }
     };
 
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    window.toggleFullscreen = toggleFullscreen;
 
     observer = new MutationObserver(() => {
       const now = Date.now();
       if (now - lastExecution < throttleTime) return; 
       lastExecution = now;
+
       
       hideElementsByClass([
         (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
@@ -156,10 +170,12 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
 
       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
+
+
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
+    // console.log("Throttled observer is running.");
 };
 
 
@@ -168,6 +184,7 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
 async function Operations(data) {
  if (data) {
       const setting = JSON.parse(data);
+      let isAds = false;
       let isShorts = false;
       let isSuggestion = false;
       let isFiltered = false;
@@ -180,39 +197,35 @@ async function Operations(data) {
       if (responseEvent?.keywords) 
       events = JSON.parse(responseEvent?.keywords);
 
-      console.log ({isActive, events});
-
       if (isActive) {
         setting.map((item) => {
           if (item?.name?.toString()?.toLowerCase() == "shorts") {
             isShorts = item?.action;
-          } else if (item?.name?.toString()?.toLowerCase() == "video suggestions") {
+          } else if (item?.name?.toString()?.toLowerCase() == "block ads") {
+            isAds = item?.action;
+          }else if (item?.name?.toString()?.toLowerCase() == "video suggestions") {
             isSuggestion = item?.action;
-          } else if (item?.name?.toString()?.toLowerCase() == "filter by keywords.") {
+          } else if (item?.name?.toString()?.toLowerCase() == "filter by keywords") {
             isFiltered = item?.action;
           }
         })
-  
-        console.log({
-          isShorts,
-          isSuggestion,
-          isFiltered
-        })
 
-        if (isFiltered)
+        if (isFiltered && events?.length > 0)
           FILTER_CONTENT_WITH_KEYWORDS(events);
   
-        CUSTOM_PARTS(isShorts, isSuggestion)
+        if (isAds) {
+          CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion)
+        } else {
+          CUSTOM_PARTS(isShorts, isSuggestion)
+        }
       }
 
     }
 }
 
 
-// load storage 
 
 chrome.storage.local.get(['setting'], function(result) {
-    console.log('Value currently is ' + result.setting, JSON.parse(result?.setting));
     if (result?.setting) {
       Operations(result?.setting);
     }
@@ -229,14 +242,9 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 
-// remove 
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-    console.log({message})
     if (message.action === "remove") {
         window.location.reload();
-        console.log("AD_SHORTS_SUGGESIONS");
         sendResponse({ success: true });
     }
 });

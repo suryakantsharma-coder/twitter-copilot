@@ -1,6 +1,7 @@
 /* global chrome */
 
 import { useEffect, useState } from "react";
+import { isExtension } from "../constant/constant";
 
 const useKeywordHook = () => {
 
@@ -8,7 +9,6 @@ const useKeywordHook = () => {
     const [value, setValue] = useState(null);
     const [isAddedFeedback, setIsAddredFeedback] = useState(false);
 
-    const isExtension = true;
 
     const setKeyWordList = (keyword) => {
         try {
@@ -18,14 +18,18 @@ const useKeywordHook = () => {
             else 
               keywords = [keyword]
 
+            if (keywords?.length <= 10) {
+                if (isExtension) {
+       chrome.storage.local.set({ keywords : JSON.stringify(keywords) }, function () {
+         console.log('keword added');
+       });
+     } else {
+       localStorage.setItem('keywords', JSON.stringify(keywords));
+     }
+            } else {
+                alert("You can only use 10 keywords for now.")
+            }
 
-             if (isExtension) {
-    chrome.storage.local.set({ keywords : JSON.stringify(keywords) }, function () {
-      console.log('keword added');
-    });
-  } else {
-    localStorage.setItem('keywords', JSON.stringify(keywords));
-  }
         } catch (err) {
             console.log(err);
             alert('failed to save keyword');
@@ -34,13 +38,18 @@ const useKeywordHook = () => {
 
     const setKeyWordListArray = (keywords) => {
         try {
-            if (isExtension) {
-    chrome.storage.local.set({ keywords : JSON.stringify(keywords) }, function () {
-      console.log('keword array list added');
-    });
-  } else {
-    localStorage.setItem('keywords', JSON.stringify(keywords));
-  }
+            if (keywords?.length <= 10) {
+                if (isExtension) {
+        chrome.storage.local.set({ keywords : JSON.stringify(keywords) }, function () {
+          console.log('keword array list added');
+        });
+      } else {
+        localStorage.setItem('keywords', JSON.stringify(keywords));
+      }         
+            }  else {
+                alert("You can only use 10 keywords for now.")
+            }
+
         } catch (err) {
             console.log(err);
             alert('failed to save keyword');

@@ -1,5 +1,11 @@
 export const settingOptions = [
         {
+          name : "Block Ads",
+          description : "Disable YouTube Ads.",
+          type : 'switch',
+          action : false
+        },
+        {
           name : "Shorts",
           description : "Disable YouTube Shorts.",
           type : 'switch',
@@ -24,6 +30,13 @@ export const settingOptions = [
           action : false
         },
         {
+          name : "Privacy policy",
+          description : "Read our privacy policy.",
+          type : 'btn',
+          action : false,
+          url : "https://sites.google.com/view/privacy-policy-for-my-tube/home"
+        },
+        {
           name : "clear settings",
           description : "Undo your changes.",
           type : 'btn',
@@ -38,3 +51,7 @@ export const settingOptions = [
           type : 'switch',
           action : true
         },]
+
+
+
+export const isExtension = true;

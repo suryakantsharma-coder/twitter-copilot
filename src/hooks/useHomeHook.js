@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { settingOptions, startOption } from "../constant/constant";
+import { isExtension, settingOptions, startOption } from "../constant/constant";
 
 const { useState, useEffect } = require("react");
 
@@ -9,11 +9,7 @@ const useHomeHook = () => {
   const [isActive, setIsActive] = useState(false);
   const [setting, setSetting] = useState([]);
   const [isStartOption, setStartOption] = useState([]);
-  const [isAdEnable, setisAdEnabled] = useState(false);
-  const [isShortsEnable, setisShortsEnabled] = useState(false);
-  const [isSuggestionEnable, setisSuggestionEnabled] = useState(false);
 
-const isExtension = true;
 
 const handleState = (isActive) => {
   if (isExtension) {
@@ -59,11 +55,16 @@ const clearSettingState = () => {
       if (isExtension) {
         chrome.storage.local.remove(["setting"], function () {
           console.log('Setting cleared');
-      });
+        });
+        
+        chrome.storage.local.remove(["keywords"], function () {
+          console.log('keywords cleared');
+        });
       } else {
         localStorage.removeItem("setting")
       }
       getSettingState();
+      window.close();
     } catch (err) {
         alert("Failed to remove setting")
         console.log("Failed to save setting");
@@ -142,7 +143,7 @@ const getStartState = async (action) => {
   }
 }
 
- const handleChromeMessaging = (events, option)=> {
+const handleChromeMessaging = (events, option)=> {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(
       tabs[0].id,
@@ -157,9 +158,9 @@ const getStartState = async (action) => {
       }
     );
   });
- }
+}
 
-  const handleExtensionState = (isActive)=> {
+const handleExtensionState = (isActive)=> {
     if (isExtension) {
     chrome.storage.local.set({ isActive : isActive }, function () {
       console.log('Value is set.');
@@ -169,51 +170,29 @@ const getStartState = async (action) => {
     localStorage.setItem("isActive", isActive);
     setIsActive(isActive);
   }
+}
+
+const handleRemoveItem = () => {
+  try {
+    handleChromeMessaging("remove", )
+  } catch (err) {
+    console.log(err);
   }
+}
 
-  const handleRemoveItem = () => {
-    try {
-      handleChromeMessaging("remove", )
-    } catch (err) {
-      console.log(err);
-    }
-  }
+useEffect(() => {
+  getStartState();
+  getSettingState();
+}, [])
 
-  // useEffect(() => {
-    // if (isExtension)
-    // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    //   const tabId = tabs[0].id;
-    //   chrome.scripting.executeScript({
-    //     target: { tabId: tabId },
-    //     function: () => {
-    //       return document.body !== null;
-    //     }
-    //   }, (result) => {
-    //     if (result && result[0].result) {
-    //     //  setIsScriptLoadded(true)
-    //     } else {
-
-    //     }
-    //   });
-    // });
-  // }, [])
-
-  useEffect(() => {
-    getStartState();
-    getSettingState();
-  }, [])
-
-  useEffect(() => {
-    getExtensionState();
-  }, [isActive])
+useEffect(() => {
+  getExtensionState();
+}, [isActive])
 
     return {
         isActive,
         isStartOption,
         setting,
-        setisAdEnabled,
-        setisShortsEnabled,
-        setisSuggestionEnabled,
         handleRemoveItem,
         handleSettingState,
         handleExtensionState,

@@ -53,6 +53,8 @@ const Home = ({setScreen}) => {
                   clearSettingState();
                 else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action)
                  setScreen("keywords");
+                else if (item?.name?.toString()?.toLowerCase() == "privacy policy")
+                 window?.open(item?.url);
               }} 
               isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
               onSwitchOff={handleRemoveItem}

@@ -8,10 +8,13 @@ const KeyWords = ({setScreen}) => {
     return (
         <div style={{
             width : '100%',
+            height : 550,
             display : 'flex',
             flexDirection : 'column',
-            overflow : 'auto',
+            overflowY : 'auto',
+            overflowX : 'hidden',
             paddingLeft : 10,
+            position : 'relative',
         }}>
 
             <div style={{
@@ -29,8 +32,17 @@ const KeyWords = ({setScreen}) => {
                 color : 'white',
                 fontSize : 18,
                 fontWeight : 'bold'
-            }}>KeyWord List</p>
+            }}>Keywords</p>
             </div>
+
+            <div style={{
+                width : '100%',
+                height : "82%",
+                overflowY : "auto",
+                overflowX : "hidden"
+                // backgroundColor  : "red"
+            }}>
+
             {
                 listOfKeywords?.map((item, index) => (
                     <div key={index} style={{
@@ -56,10 +68,11 @@ const KeyWords = ({setScreen}) => {
                     </div>
                 ))
             }
+            </div>
 
-            <div style={{width : "100%", display : 'flex', gap : 4}}>
+            <div style={{width : "100%", display : 'flex', gap : 4, position : 'absolute', bottom : 0, left : 0,padding : 5, backgroundColor : "black" }}>
                 <input style={{
-                    width : '80%',
+                    width : '78%',
                     padding : 6,
                     border : 'none',
                     outline : 'none',

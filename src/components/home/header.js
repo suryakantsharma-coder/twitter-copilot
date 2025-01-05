@@ -1,4 +1,5 @@
-import { IoMdSettings } from "react-icons/io";
+
+import AppIcon from "../../assets/my-tube.png";
 
 const Header = () => {
     return (
@@ -12,13 +13,15 @@ const Header = () => {
             // paddingRight : 6,
             backgroundColor : '#202020',
         }}>
+
+            <img style={{width : 20, height: 20, marginRight : 10}} src={AppIcon} alt="icons" />
             <p style={{
                 width : "50%",
                 fontSize : 18,
                 color : 'white',
                 fontWeight : 'bold',
                 textAlign : "left",
-            }}>YT</p>
+            }}>My Tube</p>
 
 
             <div style={{

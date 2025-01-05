@@ -1,10 +1,8 @@
 import { useState } from "react";
 import Switch from "react-switch";
-import useHomeHook from "../../hooks/useHomeHook";
 
 const ActiveSwitch = () => {
     const [isActive, setIsActive] = useState(false);
-    // const {isActive, handleButtonClick} = useHomeHook();
 
     return (
         <div style={{
@@ -22,7 +20,6 @@ const ActiveSwitch = () => {
 
         <Switch height={25} checked={isActive} onChange={(e) => {
             console.log({e})
-            // handleButtonClick(!isActive);
         }}/>
         </div>
 

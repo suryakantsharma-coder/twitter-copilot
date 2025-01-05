@@ -3,366 +3,6 @@ console.log("Content script loaded");
 
 let observer = null;
 
-function AD_SHORTS_SUGGESTIONS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsCheckByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-            if (item?.innerText?.toString()?.toLowerCase() == ("Nishkarsh Sharma")?.toLowerCase()) {
-                item.hidden = true
-            }
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-    observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'ad-container',
-        'video-ads',
-        'ytp-ad-module',
-        'style-scope yt-horizontal-list-renderer', //shorts
-        //'style-scope ytd-watch-flexy' //suggestions
-        // 'style-scope ytd-item-section-renderer', //shorts
-      ]);
-
-      hideElementsCheckByTagName([
-        "yt-simple-endpoint style-scope yt-formatted-string"
-      ])
-
-      hideElementsByTagName([
-        'ytd-watch-next-secondary-results-renderer' //suggestions
-      ]);
-
-      // Skip video ads if they're playing
-      const video = document.querySelector('video');
-      if (video && document.querySelector('.ad-showing')) {
-        video.currentTime = video.duration; // Skip ad
-      }
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
-function SHORTS_SUGGESTIONS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsCheckByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-            if (item?.innerText?.toString()?.toLowerCase() == ("Nishkarsh Sharma")?.toLowerCase()) {
-                item.hidden = true
-            }
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-      observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'style-scope yt-horizontal-list-renderer', //shorts
-      ]);
-
-      hideElementsByTagName([
-        'ytd-watch-next-secondary-results-renderer' //suggestions
-      ]);
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
-function AD_SUGGESTIONS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-     observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'ad-container',
-        'video-ads',
-        'ytp-ad-module',
-      ]);
-
-
-      hideElementsByTagName([
-        'ytd-watch-next-secondary-results-renderer' //suggestions
-      ]);
-
-      // Skip video ads if they're playing
-      const video = document.querySelector('video');
-      if (video && document.querySelector('.ad-showing')) {
-        video.currentTime = video.duration; // Skip ad
-      }
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
-function AD_SHORTS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-     observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'ad-container',
-        'video-ads',
-        'ytp-ad-module',
-        'style-scope yt-horizontal-list-renderer', //shorts
-        //'style-scope ytd-watch-flexy' //suggestions
-        // 'style-scope ytd-item-section-renderer', //shorts
-      ]);
-
-      // Skip video ads if they're playing
-      const video = document.querySelector('video');
-      if (video && document.querySelector('.ad-showing')) {
-        video.currentTime = video.duration; // Skip ad
-      }
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
-function AD () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-     observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'ad-container',
-        'video-ads',
-        'ytp-ad-module',
-      ]);
-
-      // Skip video ads if they're playing
-      const video = document.querySelector('video');
-      if (video && document.querySelector('.ad-showing')) {
-        video.currentTime = video.duration; // Skip ad
-      }
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
 function REMOVE_SCRIPT() {
     if (observer) {
         observer.disconnect();
@@ -378,128 +18,6 @@ function REMOVE_SCRIPT() {
     console.log("Script removed!");
     window.location.reload();
 }
-
-function SHORTS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-     observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-      // Hide specified elements
-      hideElementsByClass([
-        'style-scope yt-horizontal-list-renderer', //shorts
-        //'style-scope ytd-watch-flexy' //suggestions
-        // 'style-scope ytd-item-section-renderer', //shorts
-      ]);
-
-      hideElementsByTagName([
-        'ytd-reel-shelf-renderer'
-      ])
-
-
-      // document.getElementsByTagName("ytd-rich-item-renderer")[2].innerText?.toLowerCase().includes("apradh ka sach")
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
-
-function SUGGESTIONS () {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
-
-    // Utility function to hide elements by class name
-    const hideElementsByClass = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByClassName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-    const hideElementsByTagName = (classNames) => {
-      classNames.forEach((className) => {
-        Array.from(document.getElementsByTagName(className)).forEach((item) => {
-          item.hidden = true;
-        });
-      });
-    };
-
-     // Function to handle fullscreen toggle
-    const toggleFullscreen = () => {
-      const fullscreenButton = document.querySelector('.icon-button.fullscreen-icon');
-      console.log({p : "fullscreen trigger"})
-      if (fullscreenButton) {
-        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFullscreen) {
-          fullscreenButton.click();
-        } else {
-          document.exitFullscreen?.() || document.webkitExitFullscreen?.();
-        }
-      } else {
-        console.warn("Fullscreen button not found");
-      }
-    };
-
-    // Define globally accessible function
-    window.toggleFullscreen = toggleFullscreen;
-
-    // Create a throttled MutationObserver
-     observer = new MutationObserver(() => {
-      const now = Date.now();
-      if (now - lastExecution < throttleTime) return; // Skip execution if throttling is active
-      lastExecution = now;
-
-
-      hideElementsByTagName([
-        'ytd-watch-next-secondary-results-renderer' //suggestions
-      ]);
-    });
-
-    // Start observing changes in the body
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("Throttled observer is running.");
-};
 
 async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 
@@ -574,8 +92,8 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 }
 
 function CUSTOM_PARTS (isShorts, isSuggestion) {
-    let lastExecution = 0; // Store the last execution timestamp
-    const throttleTime = 200; // Time in ms to throttle executions
+    let lastExecution = 0; 
+    const throttleTime = 200;
 
     const hideElementsByClass = (classNames) => {
       classNames.forEach((className) => {
@@ -593,13 +111,18 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       });
     };
 
-    const hideSuggestionElementsById = () => {
-      const element = document.getElementById("secondary");
-      if (element) {
-        element.style.display = "none";
-      } else {
-        console.error("Element not found");
-      }
+    function hideChildElementById(rootId, childId) {
+    const rootElement = document.getElementById(rootId);
+    if (rootElement) {
+        const childElement = rootElement.querySelector(`#${childId}`);
+        if (childElement) {
+            childElement.style.setProperty("display", "none", "important");
+        } else {
+            console.error(`Child element #${childId} not found within #${rootId}`);
+        }
+    } else {
+        console.error(`Root element #${rootId} not found`);
+    }
     };
 
     const toggleFullscreen = () => {
@@ -623,8 +146,6 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       const now = Date.now();
       if (now - lastExecution < throttleTime) return; 
       lastExecution = now;
-
-      console.log("OBSERVER_WORKS");
       
       hideElementsByClass([
         (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
@@ -632,7 +153,7 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
       ]);
 
   
-      (isSuggestion) && hideSuggestionElementsById(); //suggestions
+      (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
 
       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
     });
@@ -692,24 +213,17 @@ async function Operations(data) {
 
 chrome.storage.local.get(['setting'], function(result) {
     console.log('Value currently is ' + result.setting, JSON.parse(result?.setting));
-
     if (result?.setting) {
       Operations(result?.setting);
-      // CUSTOM_PARTS(isShorts, isSuggestion)
-
     }
-
-
-
 });
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
-     console.log("change recived!", changes);
-
-     console.log('Value currently is ' + changes.setting.newValue, JSON.parse(changes?.setting?.newValue));
-
     if (changes?.setting?.newValue) {
+      if (observer) {
+        observer.disconnect();
+      }
       Operations(changes?.setting?.newValue);
     }
 });

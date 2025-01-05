@@ -8,6 +8,7 @@ const SettingItem = ({
   handleSettingChange = () => {},
   onStateChange = () => {},
   onItemClick = () => {},
+  isKeywordsEnable = false,
 }) => {
   const [isActive, setIsActive] = useState(item.action || false);
 
@@ -18,7 +19,8 @@ const SettingItem = ({
                 padding : 12,
                 color : 'white',
                 display : 'flex',
-                justifyContent :'space-between'
+                justifyContent :'space-between',
+                opacity : (item?.name?.toString()?.toLowerCase() == "keywords settings" && !isKeywordsEnable) ? 0.2: 1
               }}
 
               onClick={()=> {

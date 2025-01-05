@@ -8,7 +8,7 @@ const useKeywordHook = () => {
     const [value, setValue] = useState(null);
     const [isAddedFeedback, setIsAddredFeedback] = useState(false);
 
-    const isExtension = true;
+    const isExtension = false;
 
     const setKeyWordList = (keyword) => {
         try {

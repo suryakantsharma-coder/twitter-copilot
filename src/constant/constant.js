@@ -18,7 +18,7 @@ export const settingOptions = [
           action : false
         },
         {
-          name : "Filter By Keywords.",
+          name : "Filter By Keywords",
           description : "Filter YouTube feeds using your keywords to stay focused and improve your viewing experience.",
           type : 'switch',
           action : false

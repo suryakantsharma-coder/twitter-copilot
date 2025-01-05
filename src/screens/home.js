@@ -46,9 +46,11 @@ const Home = ({setScreen}) => {
               <SettingItem isExtensionActive={isActive} key={index} item={item} handleSettingChange={handleSettingState} onItemClick={() => {
                 if (item?.name?.toString()?.toLowerCase() == "clear settings") 
                   clearSettingState();
-                else if (item?.name?.toString()?.toLowerCase() == "keywords settings")
+                else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action)
                  setScreen("keywords");
-              }} />
+              }} 
+              isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
+              />
             )
           })
         }

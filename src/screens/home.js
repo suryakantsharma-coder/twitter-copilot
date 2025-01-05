@@ -1,12 +1,11 @@
-import { useState } from "react";
+
 import Header from "../components/home/header";
 import KeyWords from "../components/home/Keywords";
 import SettingItem from "./setting";
 import useHomeHook from "../hooks/useHomeHook";
-import { settingOptions, startOption } from "../constant/constant";
 
 const Home = ({setScreen}) => {
-   const {setting, isActive, handleExtensionState, handleSettingState, getSettingState, clearSettingState} = useHomeHook();
+   const {setting,isStartOption, isActive, handleExtensionState, handleSettingState, clearSettingState, handleRemoveItem} = useHomeHook();
 
     return (
         <div style={{
@@ -25,9 +24,15 @@ const Home = ({setScreen}) => {
         alignItems : 'center',
       }}>
         {
-          startOption?.map((item, index) => {
+          isStartOption?.map((item, index) => {
+            const itemState = {
+               name : "My Tube Active",
+          description : "Activate this extension.",
+          type : 'switch',
+          action : (!isActive) ? false : true
+            }
             return (
-              <SettingItem key={index} item={item} onStateChange={handleExtensionState} />
+              <SettingItem key={index} item={itemState} onStateChange={handleExtensionState} onSwitchOff={handleRemoveItem} isExtenstionActiveBtn={true} />
             )
           })
         }
@@ -50,6 +55,7 @@ const Home = ({setScreen}) => {
                  setScreen("keywords");
               }} 
               isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
+              onSwitchOff={handleRemoveItem}
               />
             )
           })

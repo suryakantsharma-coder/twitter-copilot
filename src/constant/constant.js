@@ -1,11 +1,5 @@
 export const settingOptions = [
         {
-          name : "Automate",
-          description : "Automate the flow when the chrome open and new tab open.",
-          type : 'switch',
-          action : false
-        },
-        {
           name : "Shorts",
           description : "Disable YouTube Shorts.",
           type : 'switch',

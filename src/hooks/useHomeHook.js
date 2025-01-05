@@ -1,6 +1,6 @@
 /* global chrome */
 
-import { settingOptions } from "../constant/constant";
+import { settingOptions, startOption } from "../constant/constant";
 
 const { useState, useEffect } = require("react");
 
@@ -8,8 +8,12 @@ const { useState, useEffect } = require("react");
 const useHomeHook = () => {
   const [isActive, setIsActive] = useState(false);
   const [setting, setSetting] = useState([]);
+  const [isStartOption, setStartOption] = useState([]);
+  const [isAdEnable, setisAdEnabled] = useState(false);
+  const [isShortsEnable, setisShortsEnabled] = useState(false);
+  const [isSuggestionEnable, setisSuggestionEnabled] = useState(false);
 
-const isExtension = false;
+const isExtension = true;
 
 const handleState = (isActive) => {
   if (isExtension) {
@@ -70,6 +74,7 @@ const getExtensionState = () => {
   try {
     if (isExtension) {
       chrome.storage.local.get(['isActive'], function (result) {
+        console.log({isActive : result?.isActive})
         setIsActive(result?.isActive);
       });
     } else {
@@ -101,6 +106,58 @@ const getSettingState = async (action) => {
   }
 }
 
+const getStartState = async (action) => {
+  try {
+    if (isExtension) {
+        const result = await chrome.storage.local.get(['isActive']);
+        console.log('Value currently is ' + result.isActive);
+        const item = startOption?.map((item) => {
+          return {
+             name : item?.name,
+          description : item?.description,
+          type : item?.type,
+          action : result?.isActive
+          }
+        })
+        setStartOption([item])
+    } else {
+      const result = localStorage.getItem("isActive");
+      console.log({setting : result})
+      if (setting){
+       const item = startOption?.map((item) => {
+          return {
+             name : item?.name,
+          description : item?.description,
+          type : item?.type,
+          action : result
+          }
+        })
+        setStartOption([item])}
+     else 
+      setStartOption(startOption)
+    }
+  } catch (err) {
+    console.log(err);
+    setStartOption(startOption)
+  }
+}
+
+ const handleChromeMessaging = (events, option)=> {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { action: events},
+      (response) => {
+        if (response?.success) {
+          // alert("Ads blocked successfully!");
+          console.log("removed")
+        } else {
+          // alert("Failed to block ads. Make sure the content script is loaded.");
+        }
+      }
+    );
+  });
+ }
 
   const handleExtensionState = (isActive)=> {
     if (isExtension) {
@@ -114,42 +171,50 @@ const getSettingState = async (action) => {
   }
   }
 
-  useEffect(() => {
-    if (isExtension)
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0].id;
-      chrome.scripting.executeScript({
-        target: { tabId: tabId },
-        function: () => {
-          return document.body !== null;
-        }
-      }, (result) => {
-        if (result && result[0].result) {
-        //  setIsScriptLoadded(true)
-        } else {
-          alert("Content script is not loaded on this page.");
-        }
-      });
-    });
+  const handleRemoveItem = () => {
+    try {
+      handleChromeMessaging("remove", )
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
-    getExtensionState();
-  }, [])
+  // useEffect(() => {
+    // if (isExtension)
+    // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    //   const tabId = tabs[0].id;
+    //   chrome.scripting.executeScript({
+    //     target: { tabId: tabId },
+    //     function: () => {
+    //       return document.body !== null;
+    //     }
+    //   }, (result) => {
+    //     if (result && result[0].result) {
+    //     //  setIsScriptLoadded(true)
+    //     } else {
+
+    //     }
+    //   });
+    // });
+  // }, [])
 
   useEffect(() => {
+    getStartState();
     getSettingState();
   }, [])
 
   useEffect(() => {
-    if (isActive)
     getExtensionState();
   }, [isActive])
 
-  
-
-
     return {
         isActive,
+        isStartOption,
         setting,
+        setisAdEnabled,
+        setisShortsEnabled,
+        setisSuggestionEnabled,
+        handleRemoveItem,
         handleSettingState,
         handleExtensionState,
         getSettingState,

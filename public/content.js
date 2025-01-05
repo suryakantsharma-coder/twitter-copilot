@@ -229,6 +229,18 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 
+// remove 
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+    console.log({message})
+    if (message.action === "remove") {
+        window.location.reload();
+        console.log("AD_SHORTS_SUGGESIONS");
+        sendResponse({ success: true });
+    }
+});
+
 
 
   

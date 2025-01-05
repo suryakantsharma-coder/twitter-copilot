@@ -1,22 +1,26 @@
 {
   "manifest_version": 3,
-  "name": "Ad-Blocker",
+  "name": "My Tube",
   "version": "1.0",
-  "description": "Ad-blocker",
+  "description": "My Tube",
   "action": {
     "default_popup": "index.html",
     "default_icon": {
-      "16": "logo192.png",
-      "48": "logo512.png",
-      "128": "logo512.png"
+      "16": "my-tube.png",
+      "48": "my-tube.png",
+      "128": "my-tube.png"
     }
   },
   "background": {
     "service_worker": "background.js"
   },
 
-  "permissions": ["scripting", "activeTab","storage"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": ["scripting", "activeTab","storage", "https://youtube.com/*",
+    "https://*.youtube.com/*"],
+  "host_permissions": [
+    "https://youtube.com/*",
+    "https://*.youtube.com/*"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

@@ -4,11 +4,13 @@ import Switch from "react-switch";
 
 const SettingItem = ({
   item, 
+  isExtenstionActiveBtn = false,
   isExtensionActive = true,
   handleSettingChange = () => {},
   onStateChange = () => {},
   onItemClick = () => {},
   isKeywordsEnable = false,
+  onSwitchOff= () => {},
 }) => {
   const [isActive, setIsActive] = useState(item.action || false);
 
@@ -60,6 +62,13 @@ const SettingItem = ({
               if (isExtensionActive) {
                 handleSettingChange(item, e)
               }
+
+              if (!e) {
+                onSwitchOff();
+              } else if (e && isExtenstionActiveBtn) {
+                onSwitchOff();
+              }
+
             }}
         />
         }

@@ -72,6 +72,33 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
       });
     };
 
+
+
+//     window.addEventListener('DOMContentLoaded', () => {
+//     const iframes = document.getElementsByTagName('iframe');
+//     for (let iframe of iframes) {
+//         if (iframe.src.includes('imasdk.googleapis.com')) {
+//             iframe.remove();
+//             console.log('Iframe removed successfully.');
+//         } else {
+//           console.log({iframe})
+//         }
+//     }
+// });
+
+     function mxAds ()  {
+      const iframes = document.getElementsByTagName('iframe');
+    for (let iframe of iframes) {
+        if (iframe.src.includes('imasdk.googleapis.com')) {
+            iframe.remove();
+            console.log('Iframe removed successfully.');
+        } else {
+          console.log({iframe})
+        }
+    }
+     }
+
+
     function hideChildElementById(rootId, childId) {
     const rootElement = document.getElementById(rootId);
     if (rootElement) {
@@ -82,7 +109,7 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
             console.error(`Child element #${childId} not found within #${rootId}`);
         }
     } else {
-        console.error(`Root element #${rootId} not found`);
+        // console.error(`Root element #${rootId} not found`);
     }
     };
 
@@ -113,6 +140,10 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
       if (video && document.querySelector('.ad-showing')) {
         video.currentTime = video.duration; // Skip ad
       }
+
+      // hideMxPlayerAds();
+
+      mxAds();
 
     });
 

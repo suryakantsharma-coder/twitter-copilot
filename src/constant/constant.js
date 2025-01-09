@@ -18,6 +18,12 @@ export const settingOptions = [
           action : false
         },
         {
+          name : "Picture In Picture Mode",
+          description : "Provide a shortcut key to activate Picture-in-Picture mode.",
+          type : 'switch',
+          action : false
+        },
+        {
           name : "Filter By Keywords",
           description : "Filter YouTube feeds using your keywords to stay focused and improve your viewing experience.",
           type : 'switch',

@@ -52,7 +52,7 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 
 }
 
-function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
+function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
     let lastExecution = 0; 
     const throttleTime = 200;
 
@@ -60,6 +60,18 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
       classNames.forEach((className) => {
         Array.from(document.getElementsByClassName(className)).forEach((item) => {
           item.hidden = true;
+        });
+      });
+    };
+
+    const hideSideBarShortElementsByClass = (classNames) => {
+      const elementText = classNames?.text;
+      console.log({elementText, classNames})
+      classNames?.list?.forEach((className) => {
+        Array.from(document.getElementsByClassName(className)).forEach((item) => {
+          if (item?.innerText?.toString()?.toLowerCase() == elementText?.toString()?.toLowerCase()) {
+            item.hidden = true;
+          }
         });
       });
     };
@@ -92,10 +104,15 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
         if (iframe.src.includes('imasdk.googleapis.com')) {
             iframe.remove();
             console.log('Iframe removed successfully.');
-        } else {
-          console.log({iframe})
         }
     }
+     }
+
+     function hideShortPageById() {
+      const element = document.getElementById("shorts-container");
+      if (element) {
+        element.style.display = "none"
+      }
      }
 
 
@@ -112,6 +129,35 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
         // console.error(`Root element #${rootId} not found`);
     }
     };
+
+    const addPiPButtonOnce = () => {
+      const svg = `<svg class="ytp-subtitles-button-icon" width="100%" height="100%" viewBox="0 0 36.00 36.00" xmlns="http://www.w3.org/2000/svg" fill="#ffffff" stroke="#ffffff" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.8160000000000001"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0h24v24H0z"></path> <path fill-rule="nonzero" d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"></path> </g> </g></svg>`
+
+    if (document.querySelector('.custom-pip-button')) return;
+
+    const controls = document.querySelector('.ytp-right-controls');
+    if (!controls) return;
+
+    const button = document.createElement('button');
+    button.innerHTML = svg || '🖥️'; 
+    button.classList.add('custom-pip-button');
+    button.style.background = 'transparent';
+    button.style.border = 'none';
+    button.style.width = '46px';
+    button.style.height = '37px';
+    button.title = 'Picture-in-Picture Mode';
+
+    button.onclick = () => {
+        const video = document.querySelector('video');
+        if (video) {
+            video.requestPictureInPicture().catch(console.error);
+        } else {
+            alert('No video found!');
+        }
+    };
+
+    controls.prepend(button);
+};
 
 
     observer = new MutationObserver(() => {
@@ -131,10 +177,21 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
         (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
       ]);
 
+      {isShorts && hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer'],
+        text : 'shorts'
+      })}
+
+      isShorts && hideShortPageById("shorts-container");
+
+
+
   
       (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
 
       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
+
+      isPip && addPiPButtonOnce();
 
       const video = document.querySelector('video');
       if (video && document.querySelector('.ad-showing')) {
@@ -145,13 +202,15 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion) {
 
       mxAds();
 
+      
+
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
     // console.log("Throttled observer is running.");
 };
 
-function CUSTOM_PARTS (isShorts, isSuggestion) {
+function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
     let lastExecution = 0; 
     const throttleTime = 200;
 
@@ -185,6 +244,57 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
     }
     };
 
+    function hideShortPageById() {
+      const element = document.getElementById("shorts-container");
+      if (element) {
+        element.style.display = "none"
+      }
+     }
+
+
+     const hideSideBarShortElementsByClass = (classNames) => {
+      const elementText = classNames?.text;
+      console.log({elementText, classNames})
+      classNames?.list?.forEach((className) => {
+        Array.from(document.getElementsByClassName(className)).forEach((item) => {
+          if (item?.innerText?.toString()?.toLowerCase() == elementText?.toString()?.toLowerCase()) {
+            item.hidden = true;
+          }
+        });
+      });
+    };
+
+
+    const addPiPButtonOnce = () => {
+      const svg = `<svg class="ytp-subtitles-button-icon" width="100%" height="100%" viewBox="0 0 36.00 36.00" xmlns="http://www.w3.org/2000/svg" fill="#ffffff" stroke="#ffffff" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.8160000000000001"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0h24v24H0z"></path> <path fill-rule="nonzero" d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"></path> </g> </g></svg>`
+
+    if (document.querySelector('.custom-pip-button')) return;
+
+    const controls = document.querySelector('.ytp-right-controls');
+    if (!controls) return;
+
+    const button = document.createElement('button');
+    button.innerHTML = svg || '🖥️'; 
+    button.classList.add('custom-pip-button');
+    button.style.background = 'transparent';
+    button.style.border = 'none';
+    button.style.width = '46px';
+    button.style.height = '37px';
+    button.title = 'Picture-in-Picture Mode';
+
+    button.onclick = () => {
+        const video = document.querySelector('video');
+        if (video) {
+            video.requestPictureInPicture().catch(console.error);
+        } else {
+            alert('No video found!');
+        }
+    };
+
+    controls.prepend(button);
+};
+
+
 
     observer = new MutationObserver(() => {
       const now = Date.now();
@@ -202,6 +312,14 @@ function CUSTOM_PARTS (isShorts, isSuggestion) {
 
       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
 
+        {isShorts && hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer'],
+        text : 'shorts'
+      })}
+
+      isShorts && hideShortPageById("shorts-container");
+
+      isPip && addPiPButtonOnce();
 
     });
 
@@ -219,6 +337,7 @@ async function Operations(data) {
       let isShorts = false;
       let isSuggestion = false;
       let isFiltered = false;
+      let isPip = false;
 
       // check if the extenstion is active or not
       const response = await chrome.storage.local.get(['isActive']);
@@ -238,6 +357,8 @@ async function Operations(data) {
             isSuggestion = item?.action;
           } else if (item?.name?.toString()?.toLowerCase() == "filter by keywords") {
             isFiltered = item?.action;
+          } else if (item?.name?.toString()?.toLowerCase() == "picture in picture mode") {
+            isPip = item?.action
           }
         })
 
@@ -245,9 +366,9 @@ async function Operations(data) {
           FILTER_CONTENT_WITH_KEYWORDS(events);
   
         if (isAds) {
-          CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion)
+          CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion, isPip)
         } else {
-          CUSTOM_PARTS(isShorts, isSuggestion)
+          CUSTOM_PARTS(isShorts, isSuggestion, isPip)
         }
       }
 

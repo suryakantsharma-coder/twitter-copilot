@@ -11,6 +11,7 @@ const SettingItem = ({
   onItemClick = () => {},
   isKeywordsEnable = false,
   onSwitchOff= () => {},
+  onSwitchOn = () => {}
 }) => {
   const [isActive, setIsActive] = useState(item.action || false);
 
@@ -26,7 +27,7 @@ const SettingItem = ({
               }}
 
               onClick={()=> {
-                if (item?.type == "btn" || item?.type == "option")
+                if (item?.type == "btn" || item?.type == "option" || item == "switch-btn")
                   onItemClick();
 
               }}
@@ -49,7 +50,7 @@ const SettingItem = ({
               </div>
               <div style={{width : "40%", display : 'flex', justifyContent : 'center', alignItems : 'center'}}>
 
-            {item?.type == "switch" && 
+            {(item?.type == "switch" || item?.type == "switch-btn" ) && 
             <Switch 
             height={24} 
             width={50} 
@@ -62,6 +63,10 @@ const SettingItem = ({
 
               if (isExtensionActive) {
                 handleSettingChange(item, e)
+              } 
+
+              if (e) {
+                onSwitchOn();
               }
 
               if (!e) {

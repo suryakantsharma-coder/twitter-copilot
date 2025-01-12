@@ -1,6 +1,11 @@
 /* global chrome */
 
-let observer = null;
+let audioContext;
+let source;
+let gainNode;
+let equalizerNodes = [];
+let initialized = false; // Prevent multiple initializations
+let ShowText = false; // Prevent multiple initializations
 
 function REMOVE_SCRIPT() {
     if (observer) {
@@ -18,7 +23,7 @@ function REMOVE_SCRIPT() {
     window.location.reload();
 }
 
-async function FILTER_CONTENT_WITH_KEYWORDS (events) {
+async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
     let lastExecution = 0; 
     const throttleTime = 200;
@@ -35,6 +40,17 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
     });
   }
 
+  const hideContentChips = () => {
+    const element = document.querySelector('#chips-content');
+    console.log({element})
+
+    if (element) {
+      element.style.display = "none";
+    } else {
+      console.error("element not found")
+    }
+  }
+
 
 
      observer = new MutationObserver(() => {
@@ -43,7 +59,8 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
       lastExecution = now;
 
       const ristrict_keyword = events || ['strange parts', 'INDIAN RAILWAYS FAN CLUB -by SATYA', 'yatri doctor', 'Destroyed Phone Restore', 'Mat Armstrong', 'JerryRigEverything', 'Linus Tech Tips', 'Joe HaTTab', 'Gyan Therapy'];
-      hideElementsByTagName([ 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
+      hideElementsByTagName([ (isShorts) && 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
+      hideContentChips(); // hide home screen chips;
     });
 
     // Start observing changes in the body
@@ -52,7 +69,197 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events) {
 
 }
 
-function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
+function VOLUME_EQULIZER(isVolume, isEqualizer) {
+    // Prevent reinitialization if already done
+    if (initialized) return ;
+      initialized = true;
+
+
+    // Select the YouTube video element
+    const video = document.querySelector('video');
+    if (!video) {
+        console.warn('No video element found!');
+        initialized = false;
+        return;
+    }
+
+    // Initialize Web Audio API once
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    source = audioContext.createMediaElementSource(video);
+    gainNode = audioContext.createGain();
+    equalizerNodes = [];
+
+    // 🎶 Frequency bands and labels for clarity
+    const frequencyBands = [
+        { freq: 60, label: "Sub Bass" }, 
+        { freq: 170, label: "Bass" },
+        { freq: 350, label: "Low Mid" },
+        { freq: 1000, label: "Mid" },
+        { freq: 3500, label: "Upper Mid" },
+        { freq: 10000, label: "Treble" }
+    ];
+
+    // Create biquad filter nodes for each frequency band
+    frequencyBands.forEach((band) => {
+        const filter = audioContext.createBiquadFilter();
+        filter.type = 'peaking'; 
+        filter.frequency.value = band.freq;
+        filter.Q.value = 1;
+        filter.gain.value = 0;
+        equalizerNodes.push(filter);
+    });
+
+    // Chain filters and gain node
+    source.connect(equalizerNodes[0]);
+    for (let i = 0; i < equalizerNodes.length - 1; i++) {
+        equalizerNodes[i].connect(equalizerNodes[i + 1]);
+    }
+    equalizerNodes[equalizerNodes.length - 1].connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Activate audio context on play
+    video.onplay = () => {
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    };
+
+    // 🎛️ Add control panel for Equalizer and Volume Booster
+    const controls = document.querySelector('#above-the-fold');
+    const controlPanel = document.createElement('div');
+    controlPanel.style.display = 'flex';
+    controlPanel.style.flexDirection = 'column';
+    controlPanel.style.background = 'transparent';
+    controlPanel.style.paddingTop = '10px';
+    controlPanel.style.paddingBottom = '10px';
+    controlPanel.style.color = '#fff';
+
+    // 🎚️ Generate sliders for frequency bands with labels
+   function Equalizer() {
+
+         const equalizerLabel = document.createElement('label');
+        equalizerLabel.innerText = 'Audio Equalizer';
+        equalizerLabel.style.marginBottom = '20px';
+        equalizerLabel.style.marginTop = '25px';
+        equalizerLabel.style.fontSize = "2rem";
+        equalizerLabel.style.fontWeight = "700";
+        controlPanel.appendChild(equalizerLabel);
+
+
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'row';
+        container.style.alignItems = 'flex-end';
+        container.style.justifyContent = 'space-around';
+        container.style.marginBottom = '20px';
+
+        frequencyBands.forEach((band, index) => {
+            const bandContainer = document.createElement('div');
+            bandContainer.style.display = 'flex';
+            bandContainer.style.flexDirection = 'column';
+            bandContainer.style.alignItems = 'center';
+            bandContainer.style.margin = '0 10px';
+
+            const label = document.createElement('label');
+            label.innerText = `${band.label} (${band.freq} Hz)`;
+            label.style.marginBottom = '5px';
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = -12;
+            slider.max = 12;
+            slider.value = 0;
+            slider.step = 1;
+            slider.style.transform = 'rotate(-90deg)';
+            slider.style.height = '150px';
+            slider.oninput = () => {
+                equalizerNodes[index].gain.value = parseFloat(slider.value);
+            };
+            bandContainer.appendChild(slider);
+            bandContainer.appendChild(label);
+            container.appendChild(bandContainer);
+        });
+        controlPanel.appendChild(container);
+    }
+
+    // 🎧 **Volume Booster Control (Boosts up to 3x)**
+    function volumeBooster() {
+        const volumeLabel = document.createElement('label');
+        volumeLabel.innerText = 'Volume Booster';
+        volumeLabel.style.marginBottom = '10px';
+        volumeLabel.style.marginTop = '25px';
+        volumeLabel.style.fontSize = "2rem";
+        volumeLabel.style.fontWeight = "700";
+
+
+        const volumeSlider = document.createElement('input');
+        volumeSlider.type = 'range';
+        volumeSlider.min = 1;
+        volumeSlider.max = 3;
+        volumeSlider.value = 1;
+        volumeSlider.step = 0.1;
+        volumeSlider.style.width = "96%";
+        volumeSlider.style.marginBottom = "20px";
+        volumeSlider.oninput = () => {
+            gainNode.gain.value = parseFloat(volumeSlider.value);
+        };
+        controlPanel.appendChild(volumeLabel);
+        controlPanel.appendChild(volumeSlider);
+    }
+
+    // Call functions based on parameters
+    if (isVolume) volumeBooster();
+    if (isEqualizer) Equalizer();
+
+    // Inject the control panel into YouTube's control bar
+    controls.prepend(controlPanel);
+}
+
+function replaceContentWithMessage(containerSelector, message, iconPath) {
+    // Select and clear the container
+    const containerElement = document.querySelector(containerSelector);
+    if (!containerElement) {
+        console.warn(`Element with selector ${containerSelector} not found.`);
+        return;
+    }
+    containerElement.innerHTML = '';  // Clear existing content
+
+    // Create a wrapper for the content
+    // const contentWrapper = document.createElement('div');
+    // contentWrapper.style.display = 'flex';
+    // contentWrapper.style.flexDirection = 'column';
+    // contentWrapper.style.justifyContent = 'center';
+    // contentWrapper.style.alignItems = 'center';
+    // contentWrapper.style.height = '100vh';
+    // contentWrapper.style.textAlign = 'center';
+
+    // Create the image element with rounded corners
+    // const imageElement = document.createElement('img');
+    // imageElement.src =  chrome.runtime.getURL(iconPath);
+    // imageElement.alt = 'My Tube Image';
+    // imageElement.style.width = '200px';
+    // imageElement.style.height = '200px';
+    // imageElement.style.borderRadius = '50%';
+    // imageElement.style.marginBottom = '20px';
+    // imageElement.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+
+    // Create the text element
+    // const textElement = document.createElement('div');
+    // textElement.textContent = message;
+    // textElement.style.fontSize = '22px';
+    // textElement.style.color = 'gray';
+    // textElement.style.fontWeight = 'bold';
+    // textElement.style.padding = '10px';
+
+    // Append image and text to the wrapper
+    // contentWrapper.appendChild(imageElement);
+    // contentWrapper.appendChild(textElement);
+
+    // Append the wrapper to the container
+    // containerElement.appendChild(contentWrapper);
+}
+
+function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory) {
     let lastExecution = 0; 
     const throttleTime = 200;
 
@@ -159,6 +366,7 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
     controls.prepend(button);
 };
 
+    
 
     observer = new MutationObserver(() => {
       const now = Date.now();
@@ -177,13 +385,29 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
         (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
       ]);
 
-      {isShorts && hideSideBarShortElementsByClass({
-        list : ['style-scope ytd-guide-entry-renderer'],
+      // (isHome) && hideElementsByClass(["style-scope ytd-two-column-browse-results-renderer"]) // hide the home screen content
+      // (isHistory) && hideElementsByClass(["style-scope ytd-two-column-browse-results-renderer"]) // hide the history screen content
+
+
+        {isShorts && hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
         text : 'shorts'
       })}
+        {isHistory && hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
+        text : 'history'
+      })}
+        {isHome &&  hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
+        text : 'home'
+      })}
+
 
       isShorts && hideShortPageById("shorts-container");
 
+      isHistory && hideElementsByClass([
+       'style-scope ytd-browse-feed-actions-renderer'
+      ]);
 
 
   
@@ -191,7 +415,29 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
 
       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
 
+      // (isPrivacy) && hideElementsByTagName(['ytd-guide-collapsible-section-entry-renderer']) // remove from side bar
+
       isPip && addPiPButtonOnce();
+
+
+      isHome && replaceContentWithMessage(
+    '#primary',  // id where to print
+    'Home Section off by My Tube', // message
+    'icon16.png'  // Replace with your desired image URL
+    );
+
+      const url = window.location.href;
+      if (url?.toString()?.includes("watch?v=")) {
+        VOLUME_EQULIZER(isVolume, isEqualizer)
+      } else if (url?.toString()?.includes("feed/history")) {
+           isHistory && replaceContentWithMessage(
+          '#primary',  // id where to print
+          'This Section off by My Tube', // message
+          'icon16.png'  // Replace with your desired image URL
+      );
+    }
+
+      
 
       const video = document.querySelector('video');
       if (video && document.querySelector('.ad-showing')) {
@@ -210,13 +456,22 @@ function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip) {
     // console.log("Throttled observer is running.");
 };
 
-function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
+function CUSTOM_PARTS (isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory) {
     let lastExecution = 0; 
     const throttleTime = 200;
 
     const hideElementsByClass = (classNames) => {
       classNames.forEach((className) => {
         Array.from(document.getElementsByClassName(className)).forEach((item) => {
+          item.hidden = true;
+        });
+      });
+    };
+
+    const hideElementsByClassWithSubType = (classNames, type) => {
+      classNames.forEach((className) => {
+        Array.from(document.getElementsByClassName(className)).forEach((item) => {
+          if (item?.type) 
           item.hidden = true;
         });
       });
@@ -251,10 +506,9 @@ function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
       }
      }
 
-
+    
      const hideSideBarShortElementsByClass = (classNames) => {
       const elementText = classNames?.text;
-      console.log({elementText, classNames})
       classNames?.list?.forEach((className) => {
         Array.from(document.getElementsByClassName(className)).forEach((item) => {
           if (item?.innerText?.toString()?.toLowerCase() == elementText?.toString()?.toLowerCase()) {
@@ -263,6 +517,22 @@ function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
         });
       });
     };
+
+    const hideSideBarElementsByClass = (elements) => {
+    elements.forEach(({ text, list }) => {
+        console.log({ text, list });
+        list.forEach((className) => {
+            Array.from(document.getElementsByClassName(className)).forEach((item) => {
+                if (item?.innerText?.toString()?.toLowerCase() === text?.toString()?.toLowerCase()) {
+                    item.hidden = true;
+                }
+            });
+        });
+    });
+};
+
+
+ 
 
 
     const addPiPButtonOnce = () => {
@@ -296,6 +566,9 @@ function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
 
 
 
+
+    // VOLUME_EQULIZER(isVolume, isEqualizer);
+
     observer = new MutationObserver(() => {
       const now = Date.now();
       if (now - lastExecution < throttleTime) return; 
@@ -306,21 +579,67 @@ function CUSTOM_PARTS (isShorts, isSuggestion, isPip) {
         (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
         (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
       ]);
+      isHistory && hideElementsByClass([
+       'style-scope ytd-browse-feed-actions-renderer'
+      ]);
+
+      // (isHistory) && hideElementsByClass(["style-scope ytd-two-column-browse-results-renderer"]) // hide the history screen content
+
+
+      // (isHome) && hideElementById("#primary")// hide the home screen content
+      // (isHome) && showText("#primary") 
+
 
   
       (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
 
-      (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
+      (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']);
+      // (isHome) && ElementsByTagName(['ytd-rich-grid-renderer']);
+      // (isHome) && showText("style-scope ytd-browse grid grid-disabled") 
+      
+
+      // Example Usage: Replacing YouTube's grid with a message and an image
+      isHome&& replaceContentWithMessage(
+          '#primary',  // id where to print
+          'This Section off by My Tube', // message
+          'icon16.png'  // Replace with your desired image URL
+      );
+     
+
+
+
 
         {isShorts && hideSideBarShortElementsByClass({
-        list : ['style-scope ytd-guide-entry-renderer'],
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
         text : 'shorts'
+      })}
+        {isHistory && hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
+        text : 'history'
+      })}
+        {isHome &&  hideSideBarShortElementsByClass({
+        list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
+        text : 'home'
       })}
 
       isShorts && hideShortPageById("shorts-container");
 
       isPip && addPiPButtonOnce();
 
+      const url = window.location.href;
+
+
+        if (url?.toString()?.includes("watch?v=")) {
+          VOLUME_EQULIZER(isVolume, isEqualizer)
+        } else if (url?.toString()?.includes("feed/history")) {
+           isHistory && replaceContentWithMessage(
+          '#primary',  // id where to print
+          'This Section off by My Tube', // message
+          'icon16.png'  // Replace with your desired image URL
+      );
+        }
+
+      
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
@@ -338,6 +657,10 @@ async function Operations(data) {
       let isSuggestion = false;
       let isFiltered = false;
       let isPip = false;
+      let isVolumeBooster = false;
+      let isEqualizer = false;
+      let isHome = false;
+      let isHistory = false;
 
       // check if the extenstion is active or not
       const response = await chrome.storage.local.get(['isActive']);
@@ -346,6 +669,8 @@ async function Operations(data) {
       let events = [];
       if (responseEvent?.keywords) 
       events = JSON.parse(responseEvent?.keywords);
+
+      console.log({events, response})
 
       if (isActive) {
         setting.map((item) => {
@@ -359,16 +684,26 @@ async function Operations(data) {
             isFiltered = item?.action;
           } else if (item?.name?.toString()?.toLowerCase() == "picture in picture mode") {
             isPip = item?.action
+          } else if (item?.name?.toString()?.toLowerCase() == "advanced volume booster") {
+            isVolumeBooster = item?.action
+          } else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer") {
+            isEqualizer = item?.action
+          } else if (item?.name?.toString()?.toLowerCase() == "home feed") {
+            isHome = item?.action
+          } else if (item?.name?.toString()?.toLowerCase() == "history") {
+            isHistory = item?.action
           }
         })
 
+        console.log({isHome, isHistory})
+
         if (isFiltered && events?.length > 0)
-          FILTER_CONTENT_WITH_KEYWORDS(events);
+          FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
   
         if (isAds) {
-          CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion, isPip)
+          CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
         } else {
-          CUSTOM_PARTS(isShorts, isSuggestion, isPip)
+          CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
         }
       }
 
@@ -378,6 +713,7 @@ async function Operations(data) {
 
 
 chrome.storage.local.get(['setting'], function(result) {
+  console.log({result})
     if (result?.setting) {
       Operations(result?.setting);
     }

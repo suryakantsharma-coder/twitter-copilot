@@ -143,7 +143,7 @@ const getStartState = async (action) => {
   }
 }
 
-const handleChromeMessaging = (events, option)=> {
+const handleChromeMessaging = (events)=> {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(
       tabs[0].id,
@@ -174,7 +174,7 @@ const handleExtensionState = (isActive)=> {
 
 const handleRemoveItem = () => {
   try {
-    handleChromeMessaging("remove", )
+    handleChromeMessaging("remove")
   } catch (err) {
     console.log(err);
   }

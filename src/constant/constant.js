@@ -6,6 +6,18 @@ export const settingOptions = [
           action : false
         },
         {
+          name : "Home Feed",
+          description : "Turn off YouTube Home Feed to remove video recommendations from the homepage.",
+          type : 'switch',
+          action : false
+        },
+        {
+          name : "History",
+          description : "Disable YouTube History it's not permanetly off but anyone can not see the history.",
+          type : 'switch',
+          action : false
+        },
+        {
           name : "Shorts",
           description : "Disable YouTube Shorts.",
           type : 'switch',
@@ -22,6 +34,18 @@ export const settingOptions = [
           description : "Provide a shortcut key to activate Picture-in-Picture mode.",
           type : 'switch',
           action : false
+        },
+        {
+          name: "Advanced Volume Booster",
+          description: "Boost your video sound levels beyond the default limit for a more immersive listening experience.",
+          type: 'switch-btn',
+          action: false
+        },
+        {
+          name: "Precision Audio Equalizer",
+          description: "Enhance your audio experience with a customizable sound equalizer, allowing you to fine-tune bass, mids, and treble for optimal clarity.",
+          type: 'switch-btn',
+          action: false
         },
         {
           name : "Filter By Keywords",

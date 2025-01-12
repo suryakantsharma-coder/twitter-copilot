@@ -1,6 +1,7 @@
 import { IoMdCloseCircle } from "react-icons/io";
 import useKeywordHook from "../../hooks/useKeywordHook";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { IoAddCircleOutline } from "react-icons/io5";
 const KeyWords = ({setScreen}) => {
     const keyword = ['strange parts', 'INDIAN RAILWAYS FAN CLUB -by SATYA', 'yatri doctor', 'Destroyed Phone Restore', 'Mat Armstrong', 'JerryRigEverything', 'Linus Tech Tips', 'Joe HaTTab', 'Gyan Therapy'];
     const {value, listOfKeywords, handleInput,addToKeywords, removeKeywords} = useKeywordHook();
@@ -77,9 +78,10 @@ const KeyWords = ({setScreen}) => {
                     border : 'none',
                     outline : 'none',
                     borderRadius : 5,
-
+                    background : "#202020",
+                    color : 'white'
                 }} value={value} type="name" placeholder="Type keyword here" onChange={handleInput}/>
-                <button style={{
+                {/* <button style={{
                     width : "10%",
                     borderRadius : 5,
                     color : 'black',
@@ -89,7 +91,9 @@ const KeyWords = ({setScreen}) => {
                     backgroundColor : "white"
                 }}
                 onClick={addToKeywords}
-                >+</button>
+                >+</button> */}
+
+                <IoAddCircleOutline  color="white" style={{width : "10%", height: 30, cursor : "pointer"}} onClick={addToKeywords}/>
             </div>
             
         </div>

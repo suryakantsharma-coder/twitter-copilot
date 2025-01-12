@@ -645,6 +645,7 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
         button.style.border = 'none';
         button.style.width = '46px';
         button.style.height = '37px';
+        button.style.cursor = 'pointer';
         button.title = 'Picture-in-Picture Mode';
         button.onclick = () => {
             const video = document.querySelector('video');

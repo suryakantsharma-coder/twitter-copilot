@@ -1,7 +1,7 @@
 export const settingOptions = [
         {
           name : "Block Ads",
-          description : "Disable YouTube Ads.",
+          description : "Disable YouTube And Mx Player Ads.",
           type : 'switch',
           action : false
         },

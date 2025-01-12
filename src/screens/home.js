@@ -65,6 +65,8 @@ const Home = ({setScreen}) => {
                   handleRemoveItem();
                 else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer")
                   handleRemoveItem();
+                else if (item?.name?.toString()?.toLowerCase() == "block ads")
+                  handleRemoveItem();
               }}
               />
             )

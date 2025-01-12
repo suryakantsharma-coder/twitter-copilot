@@ -35,7 +35,8 @@ const handleSettingState = (item, action) => {
           return current;
         }
       })
-      console.log({data});
+
+
       if (isExtension) {
         chrome.storage.local.set({ setting : JSON.stringify(data) }, function () {
           console.log('Setting Saved');

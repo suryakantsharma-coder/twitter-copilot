@@ -161,6 +161,23 @@ const handleChromeMessaging = (events)=> {
   });
 }
 
+const handleChromeMessagingNotification = (events)=> {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { action: events},
+      (response) => {
+        if (response?.success) {
+          // alert("Ads blocked successfully!");
+          console.log("notified")
+        } else {
+          // alert("Failed to block ads. Make sure the content script is loaded.");
+        }
+      }
+    );
+  });
+}
+
 const handleExtensionState = (isActive)=> {
     if (isExtension) {
     chrome.storage.local.set({ isActive : isActive }, function () {
@@ -198,7 +215,8 @@ useEffect(() => {
         handleSettingState,
         handleExtensionState,
         getSettingState,
-        clearSettingState
+        clearSettingState,
+        handleChromeMessagingNotification
     }
 }
 

@@ -1,4 +1,3 @@
-
 import Header from "../components/home/header";
 import KeyWords from "../components/home/Keywords";
 import SettingItem from "./setting";
@@ -73,7 +72,7 @@ const Home = ({setScreen}) => {
           })
         }
       </div>
-        
+     
         <KeyWords />
        {/* <ActiveSwitch /> */}
         </div>

@@ -1,5 +1,5 @@
 /* global chrome */
-
+let observer;
 let audioContext;
 let source;
 let gainNode;
@@ -71,23 +71,26 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
 function VOLUME_EQULIZER(isVolume, isEqualizer) {
     // Prevent reinitialization if already done
-    if (initialized) return ;
-      initialized = true;
+    if (initialized) return;
 
 
     // Select the YouTube video element
-    const video = document.querySelector('video');
+    const video = document.querySelector('video')
     if (!video) {
         console.warn('No video element found!');
         initialized = false;
         return;
-    }
+    } 
+
 
     // Initialize Web Audio API once
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!initialized)
     source = audioContext.createMediaElementSource(video);
     gainNode = audioContext.createGain();
     equalizerNodes = [];
+    initialized = true;
+
 
     // 🎶 Frequency bands and labels for clarity
     const frequencyBands = [
@@ -125,7 +128,19 @@ function VOLUME_EQULIZER(isVolume, isEqualizer) {
     };
 
     // 🎛️ Add control panel for Equalizer and Volume Booster
-    const controls = document.querySelector('#above-the-fold');
+    let controls;
+     controls = document.querySelector('#above-the-fold');
+    if (!controls) {
+        controls = document.querySelectorAll('.sp-content')[0];
+        console.warn('No control bar found!');
+        if (!controls) {
+            console.warn('No control bar found!');
+            initialized = false;
+            return;
+        }
+        // initialized = false;
+        // return;
+    }
     const controlPanel = document.createElement('div');
     controlPanel.style.display = 'flex';
     controlPanel.style.flexDirection = 'column';
@@ -225,363 +240,6 @@ function replaceContentWithMessage(containerSelector, message, iconPath) {
     containerElement.innerHTML = '';  // Clear existing content
 }
 
-// function CUSTOM_PARTS_WITH_AD_BLOCKER (isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory) {
-//     let lastExecution = 0; 
-//     const throttleTime = 200;
-
-//     const hideElementsByClass = (classNames) => {
-//       classNames.forEach((className) => {
-//         Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//           item.hidden = true;
-//         });
-//       });
-//     };
-
-//     const hideSideBarShortElementsByClass = (classNames) => {
-//       const elementText = classNames?.text;
-//       console.log({elementText, classNames})
-//       classNames?.list?.forEach((className) => {
-//         Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//           if (item?.innerText?.toString()?.toLowerCase() == elementText?.toString()?.toLowerCase()) {
-//             item.hidden = true;
-//           }
-//         });
-//       });
-//     };
-
-//     const hideElementsByTagName = (classNames) => {
-//       classNames.forEach((className) => {
-//         Array.from(document.getElementsByTagName(className)).forEach((item) => {
-//           item.hidden = true;
-//         });
-//       });
-//     };
-
-
-//      function mxAds ()  {
-//       const iframes = document.getElementsByTagName('iframe');
-//     for (let iframe of iframes) {
-//         if (iframe.src.includes('imasdk.googleapis.com')) {
-//             iframe.remove();
-//             console.log('Iframe removed successfully.');
-//         }
-//     }
-//      }
-
-//      function hideShortPageById() {
-//       const element = document.getElementById("shorts-container");
-//       if (element) {
-//         element.style.display = "none"
-//       }
-//      }
-
-
-//     function hideChildElementById(rootId, childId) {
-//     const rootElement = document.getElementById(rootId);
-//     if (rootElement) {
-//         const childElement = rootElement.querySelector(`#${childId}`);
-//         if (childElement) {
-//             childElement.style.setProperty("display", "none", "important");
-//         } else {
-//             console.error(`Child element #${childId} not found within #${rootId}`);
-//         }
-//     } else {
-//         // console.error(`Root element #${rootId} not found`);
-//     }
-//     };
-
-//     const addPiPButtonOnce = () => {
-//       const svg = `<svg class="ytp-subtitles-button-icon" width="100%" height="100%" viewBox="0 0 36.00 36.00" xmlns="http://www.w3.org/2000/svg" fill="#ffffff" stroke="#ffffff" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.8160000000000001"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0h24v24H0z"></path> <path fill-rule="nonzero" d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"></path> </g> </g></svg>`
-
-//     if (document.querySelector('.custom-pip-button')) return;
-
-//     const controls = document.querySelector('.ytp-right-controls');
-//     if (!controls) return;
-
-//     const button = document.createElement('button');
-//     button.innerHTML = svg || '🖥️'; 
-//     button.classList.add('custom-pip-button');
-//     button.style.background = 'transparent';
-//     button.style.border = 'none';
-//     button.style.width = '46px';
-//     button.style.height = '37px';
-//     button.title = 'Picture-in-Picture Mode';
-
-//     button.onclick = () => {
-//         const video = document.querySelector('video');
-//         if (video) {
-//             video.requestPictureInPicture().catch(console.error);
-//         } else {
-//             alert('No video found!');
-//         }
-//     };
-
-//     controls.prepend(button);
-// };
-
-    
-
-//     observer = new MutationObserver(() => {
-//       const now = Date.now();
-//       if (now - lastExecution < throttleTime) return; 
-//       lastExecution = now;
-
-//       hideElementsByClass([
-//         'ad-container',
-//         'video-ads',
-//         'ytp-ad-module',
-//       ]);
-
-      
-//       hideElementsByClass([
-//         (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
-//         (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
-//       ]);
-
-//       // (isHome) && hideElementsByClass(["style-scope ytd-two-column-browse-results-renderer"]) // hide the home screen content
-//       // (isHistory) && hideElementsByClass(["style-scope ytd-two-column-browse-results-renderer"]) // hide the history screen content
-
-
-//         {isShorts && hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'shorts'
-//       })}
-//         {isHistory && hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'history'
-//       })}
-//         {isHome &&  hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'home'
-//       })}
-
-
-//       isShorts && hideShortPageById("shorts-container");
-
-//       isHistory && hideElementsByClass([
-//        'style-scope ytd-browse-feed-actions-renderer'
-//       ]);
-
-
-  
-//       (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
-
-//       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']) 
-
-//       isPip && addPiPButtonOnce();
-
-
-//       isHome && replaceContentWithMessage(
-//     '#primary',  // id where to print
-//     'Home Section off by My Tube', // message
-//     'icon16.png'  // Replace with your desired image URL
-//     );
-
-//       const url = window.location.href;
-//       if (url?.toString()?.includes("watch?v=")) {
-//         VOLUME_EQULIZER(isVolume, isEqualizer)
-//       } else if (url?.toString()?.includes("feed/history")) {
-//            isHistory && replaceContentWithMessage(
-//           '#primary',  // id where to print
-//           'This Section off by My Tube', // message
-//           'icon16.png'  // Replace with your desired image URL
-//       );
-//     }
-
-      
-
-//       const video = document.querySelector('video');
-//       if (video && document.querySelector('.ad-showing')) {
-//         video.currentTime = video.duration; // Skip ad
-//       }
-
-//       mxAds();
-
-      
-
-//     });
-
-//     observer.observe(document.body, { childList: true, subtree: true });
-// };
-
-// function CUSTOM_PARTS (isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory) {
-//     let lastExecution = 0; 
-//     const throttleTime = 200;
-
-//     const hideElementsByClass = (classNames) => {
-//       classNames.forEach((className) => {
-//         Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//           item.hidden = true;
-//         });
-//       });
-//     };
-
-//     const hideElementsByClassWithSubType = (classNames, type) => {
-//       classNames.forEach((className) => {
-//         Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//           if (item?.type) 
-//           item.hidden = true;
-//         });
-//       });
-//     };
-
-//     const hideElementsByTagName = (classNames) => {
-//       classNames.forEach((className) => {
-//         Array.from(document.getElementsByTagName(className)).forEach((item) => {
-//           item.hidden = true;
-//         });
-//       });
-//     };
-
-//     function hideChildElementById(rootId, childId) {
-//     const rootElement = document.getElementById(rootId);
-//     if (rootElement) {
-//         const childElement = rootElement.querySelector(`#${childId}`);
-//         if (childElement) {
-//             childElement.style.setProperty("display", "none", "important");
-//         } else {
-//             console.error(`Child element #${childId} not found within #${rootId}`);
-//         }
-//     } else {
-//         console.error(`Root element #${rootId} not found`);
-//     }
-//     };
-
-//     function hideShortPageById() {
-//       const element = document.getElementById("shorts-container");
-//       if (element) {
-//         element.style.display = "none"
-//       }
-//      }
-
-    
-//      const hideSideBarShortElementsByClass = (classNames) => {
-//       const elementText = classNames?.text;
-//       classNames?.list?.forEach((className) => {
-//         Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//           if (item?.innerText?.toString()?.toLowerCase() == elementText?.toString()?.toLowerCase()) {
-//             item.hidden = true;
-//           }
-//         });
-//       });
-//     };
-
-//     const hideSideBarElementsByClass = (elements) => {
-//     elements.forEach(({ text, list }) => {
-//         console.log({ text, list });
-//         list.forEach((className) => {
-//             Array.from(document.getElementsByClassName(className)).forEach((item) => {
-//                 if (item?.innerText?.toString()?.toLowerCase() === text?.toString()?.toLowerCase()) {
-//                     item.hidden = true;
-//                 }
-//             });
-//         });
-//     });
-// };
-
-
- 
-
-
-//     const addPiPButtonOnce = () => {
-//       const svg = `<svg class="ytp-subtitles-button-icon" width="100%" height="100%" viewBox="0 0 36.00 36.00" xmlns="http://www.w3.org/2000/svg" fill="#ffffff" stroke="#ffffff" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)" stroke-width="0.00024000000000000003"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.8160000000000001"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="none" d="M0 0h24v24H0z"></path> <path fill-rule="nonzero" d="M21 3a1 1 0 0 1 1 1v7h-2V5H4v14h6v2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h18zm0 10a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-8a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h8zm-1 2h-6v4h6v-4z"></path> </g> </g></svg>`
-
-//     if (document.querySelector('.custom-pip-button')) return;
-
-//     const controls = document.querySelector('.ytp-right-controls');
-//     if (!controls) return;
-
-//     const button = document.createElement('button');
-//     button.innerHTML = svg || '🖥️'; 
-//     button.classList.add('custom-pip-button');
-//     button.style.background = 'transparent';
-//     button.style.border = 'none';
-//     button.style.width = '46px';
-//     button.style.height = '37px';
-//     button.title = 'Picture-in-Picture Mode';
-
-//     button.onclick = () => {
-//         const video = document.querySelector('video');
-//         if (video) {
-//             video.requestPictureInPicture().catch(console.error);
-//         } else {
-//             alert('No video found!');
-//         }
-//     };
-
-//     controls.prepend(button);
-// };
-
-
-
-
-//     // VOLUME_EQULIZER(isVolume, isEqualizer);
-
-//     observer = new MutationObserver(() => {
-//       const now = Date.now();
-//       if (now - lastExecution < throttleTime) return; 
-//       lastExecution = now;
-
-      
-//       hideElementsByClass([
-//         (isShorts) &&  'style-scope ytd-rich-shelf-renderer',
-//         (isShorts) && 'style-scope yt-horizontal-list-renderer', //shorts
-//       ]);
-//       isHistory && hideElementsByClass([
-//        'style-scope ytd-browse-feed-actions-renderer'
-//       ]);
-
-
-  
-//       (isSuggestion) && hideChildElementById('columns','secondary'); //suggestions
-
-//       (isShorts) && hideElementsByTagName(['ytd-reel-shelf-renderer']);
-//       isHome&& replaceContentWithMessage(
-//           '#primary',  // id where to print
-//           'This Section off by My Tube', // message
-//           'icon16.png'  // Replace with your desired image URL
-//       );
-     
-
-
-
-
-//         {isShorts && hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'shorts'
-//       })}
-//         {isHistory && hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'history'
-//       })}
-//         {isHome &&  hideSideBarShortElementsByClass({
-//         list : ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'],
-//         text : 'home'
-//       })}
-
-//       isShorts && hideShortPageById("shorts-container");
-
-//       isPip && addPiPButtonOnce();
-
-//       const url = window.location.href;
-
-
-//         if (url?.toString()?.includes("watch?v=")) {
-//           VOLUME_EQULIZER(isVolume, isEqualizer)
-//         } else if (url?.toString()?.includes("feed/history")) {
-//            isHistory && replaceContentWithMessage(
-//           '#primary',  // id where to print
-//           'This Section off by My Tube', // message
-//           'icon16.png'  // Replace with your desired image URL
-//       );
-//         }
-
-      
-//     });
-
-//     observer.observe(document.body, { childList: true, subtree: true });
-//     // console.log("Throttled observer is running.");
-// };
 
 
 // filter operations 
@@ -632,6 +290,13 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
         }
     };
 
+    const hideElementByShortsClassName = (className, num) => {
+        const elements = document.getElementsByClassName(className);
+        if (elements?.length > 0) {
+            elements[num].hidden = true;
+        }
+    }
+
     const addPiPButtonOnce = () => {
         if (document.querySelector('.custom-pip-button')) return;
 
@@ -664,6 +329,8 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
         if (now - lastExecution < throttleTime) return;
         lastExecution = now;
 
+        console.log('MutationObserver triggered.', isAdBlocker);
+
         if (isAdBlocker) {
             hideElements('ad-container');
             hideElements('video-ads');
@@ -673,7 +340,8 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
 
         if (isShorts) {
             hideElements('style-scope ytd-rich-shelf-renderer');
-            hideElements('style-scope yt-horizontal-list-renderer');
+            // hideElements('shortsLockupViewModelHost style-scope ytd-rich-item-renderer');
+            hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2);
             hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts' });
             hideElementById("shorts-container");
             hideElements('ytd-reel-shelf-renderer', false);
@@ -695,6 +363,8 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
 
         const url = window.location.href;
         if (url.includes("watch?v=")) {
+            VOLUME_EQULIZER(isVolume, isEqualizer);
+        } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
             VOLUME_EQULIZER(isVolume, isEqualizer);
         } else if (url.includes("feed/history")) {
             replaceContentWithMessage('#primary', 'This Section off by My Tube', 'icon16.png');
@@ -762,7 +432,7 @@ async function Operations(data) {
         //   CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
         // }
         
-        CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
+        CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory, isAds)
       }
 
     }

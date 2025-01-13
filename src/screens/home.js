@@ -31,7 +31,7 @@ const Home = ({setScreen}) => {
           action : (!isActive) ? false : true
             }
             return (
-              <SettingItem key={index} item={itemState} onStateChange={handleExtensionState} onSwitchOff={handleRemoveItem} isExtenstionActiveBtn={true} />
+              <SettingItem key={index} item={itemState} onStateChange={handleExtensionState} onSwitchOff={handleRemoveItem} isExtenstionActiveBtn={true}  onSwitchOn={handleRemoveItem}/>
             )
           })
         }
@@ -63,8 +63,6 @@ const Home = ({setScreen}) => {
                if (item?.name?.toString()?.toLowerCase() == "advanced volume booster")
                   handleRemoveItem();
                 else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer")
-                  handleRemoveItem();
-                else if (item?.name?.toString()?.toLowerCase() == "block ads")
                   handleRemoveItem();
               }}
               />

@@ -35,7 +35,8 @@
         "https://www.mxplayer.in/*"
       ],
       "js": ["content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "type": "module"
     }
   ]
 }

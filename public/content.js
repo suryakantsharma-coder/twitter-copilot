@@ -252,7 +252,7 @@ function initAudioContext(video) {
     source = audioContext.createMediaElementSource(video);
     gainNode = audioContext.createGain();
     equalizerNodes = createEqualizerNodes();
-    initialized = true;
+    initialized = false;
 
     chainAudioNodes();
     video.onplay = () => {
@@ -400,18 +400,19 @@ function setVisibility(elementName, visibility) {
         return true;
 }
 
-function VOLUME_EQUALIZER_AND_BOOSTER(isVolume, isEqualizer, visibility = false) {
+function VOLUME_EQUALIZER_AND_BOOSTER(isVolume, isEqualizer, visibility = false, ISVOLUMEBOOSTER) {
     const video = document.querySelector('video');
     if (initialized)
         initAudioContext(video);
     else if (visibility && !initialized)
-        disconnectAudioContext();
+        if (!isVolume && !isEqualizer)
+            disconnectAudioContext();
 
     if (!video) return;
 
 
     const controlPanel = document.createElement('div');
-    controlPanel.classList.add('volume-control-box');
+    controlPanel.classList.add((ISVOLUMEBOOSTER) ? 'volume-control-box' : 'equalizer-control-box');
     controlPanel.style.display = 'flex';
     controlPanel.style.flexDirection = 'column';
     controlPanel.style.background = 'transparent';
@@ -421,16 +422,17 @@ function VOLUME_EQUALIZER_AND_BOOSTER(isVolume, isEqualizer, visibility = false)
 
     let needToCreate = false;
 
-    if (isVolume) needToCreate = setVisibility('.volume-control-box', visibility);
-    if (isEqualizer) needToCreate = setVisibility('.volume-control-box', visibility);
-
-    if (isVolume) createVolumeControlPanel(controlPanel);
-    if (isEqualizer) createEqualizerControlPanel(controlPanel);
+    if (ISVOLUMEBOOSTER) {
+        needToCreate = setVisibility('.volume-control-box', visibility);
+        createVolumeControlPanel(controlPanel);
+    } else {
+        needToCreate = setVisibility('.equalizer-control-box', visibility);
+        createEqualizerControlPanel(controlPanel);
+    }
 
     const controls = document.querySelector('#above-the-fold') || document.querySelectorAll('.sp-content')[0];
     if (controls && needToCreate) controls.prepend(controlPanel);
 }
-
 
 function replaceContentWithMessage(containerSelector, message, iconPath, visibility = false) {
     // Select and clear the container
@@ -456,60 +458,49 @@ function replaceContentWithMessage(containerSelector, message, iconPath, visibil
  
 }
 
-// run one timw function
-
-function HomeFeedCaller (fnCall) {
-    if (!initalizerHome) return;
-    fnCall();
-    initalizerHome = false;
-}
-
-
 
 
 // filter operations 
 
-
-// haandle filter operations
-
-
- const hideElements = (selector, byClass = true, visibility = false) => {
+const hideElements = (selector, byClass = true, visibility = false) => {
             const elements = byClass ? document.getElementsByClassName(selector) : document.getElementsByTagName(selector);
             if (!visibility) 
             Array.from(elements).forEach(item => item.hidden = true);
             else
             Array.from(elements).forEach(item => item.hidden = false);
-            };
+};
     
-            const hideSideBarElements = ({ list, text, visibility = false}) => {
-                list.forEach(className => {
-                    Array.from(document.getElementsByClassName(className)).forEach(item => {
-                        if (item.innerText.toLowerCase() === text.toLowerCase()) {
-                            if (!visibility)
+const hideSideBarElements = ({ list, text, visibility = false}) => {
+            list.forEach(className => {
+                Array.from(document.getElementsByClassName(className)).forEach(item => {
+                    if (item.innerText.toLowerCase() === text.toLowerCase()) {
+                        if (!visibility)
                             item.hidden = true;
-                            else
+                        else {
                             item.hidden = false;
+                            console.log({element : item.hidden})
                         }
-                    });
+                    }
                 });
-            };
-    
-            const mxAds = () => {
+            });
+};
+
+const mxAds = () => {
             Array.from(document.getElementsByTagName('iframe')).forEach(iframe => {
                 if (iframe.src.includes('imasdk.googleapis.com')) {
                     iframe.remove();
                     console.log('Iframe removed successfully.');
                 }
             });
-            };
-    
-            const hideElementById = (id, visibility = false) => {
+};
+
+const hideElementById = (id, visibility = false) => {
             const element = document.getElementById(id);
             if (element && !visibility) element.style.display = "none";
             else  if (element && visibility) element.style.display = "flex";
-            };
-    
-            const hideChildElementById = (rootId, childId, visibility = false) => {
+};
+
+const hideChildElementById = (rootId, childId, visibility = false) => {
             const rootElement = document.getElementById(rootId);
             if (rootElement) {
                 const childElement = rootElement.querySelector(`#${childId}`);
@@ -522,9 +513,9 @@ function HomeFeedCaller (fnCall) {
                     console.error(`Child element #${childId} not found within #${rootId}`);
                 }
             }
-            };
-    
-            const hideElementByShortsClassName = (className, num, visibility = false) => {
+};
+
+const hideElementByShortsClassName = (className, num, visibility = false) => {
             const elements = document.getElementsByClassName(className);
             if (elements?.length > 0) {
                 if (visibility) 
@@ -532,9 +523,9 @@ function HomeFeedCaller (fnCall) {
                 else 
                     elements[num].hidden = false;
             }
-            }
-    
-            const addPiPButtonOnce = (visibility = false) => {
+}
+
+const addPiPButtonOnce = (visibility = false) => {
                 if (visibility) {
                     const button = document.querySelector('.custom-pip-button');
                     if (button) button.hidden = true;
@@ -569,7 +560,7 @@ function HomeFeedCaller (fnCall) {
                     }
                 }
 
-            };
+};
 
 
 function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory, isAdBlocker = false, visibility = false) {
@@ -645,7 +636,7 @@ function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHo
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-function CUSTOM_PARTS_EXECUTION(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory, isAdBlocker = false, visibility = false,  itemAction) {
+function CUSTOM_PARTS_EXECUTION() {
     const throttleTime = 200;
     let lastExecution = 0;
 
@@ -654,53 +645,29 @@ function CUSTOM_PARTS_EXECUTION(isShorts, isSuggestion, isPip, isVolume, isEqual
         if (now - lastExecution < throttleTime) return;
         lastExecution = now;
 
-        if (isAdBlocker) {
-            // hideElements('ad-container');
-            // hideElements('video-ads');
-            // hideElements('ytp-ad-module');
-            // mxAds();
-        }
-
         if (isShorts) {
             hideElements('style-scope ytd-rich-shelf-renderer');
-            // hideElements('shortsLockupViewModelHost style-scope ytd-rich-item-renderer');
             hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts' });
             hideElementById("shorts-container");
             hideElements('ytd-reel-shelf-renderer', false);
-        } else {
-            hideElements('style-scope ytd-rich-shelf-renderer', false, true);
-            // hideElements('shortsLockupViewModelHost style-scope ytd-rich-item-renderer');
-            hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, true);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : true });
-            hideElementById("shorts-container", true);
-            hideElements('ytd-reel-shelf-renderer', false, true);
-
         }
 
         if (isHistory) {
             hideElements('style-scope ytd-browse-feed-actions-renderer', true, false);
             hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history' });
-        } else {
-            hideElements('style-scope ytd-browse-feed-actions-renderer', true, true);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history', vsibility : true });
-        }
+        } 
 
         if (isHome) {
             hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
             replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
-        } else { 
-            HomeFeedCaller(() => {
-                    hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home', visibility : true });   
-                    replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png', true);
-            })
         }
 
+
         if (isSuggestion) hideChildElementById('columns', 'secondary') 
-            else hideChildElementById('columns', 'secondary', true);
+          
 
         if (isPip) addPiPButtonOnce() 
-            else if (isPip && !visibility) addPiPButtonOnce(true);
+        
 
         const url = window.location.href;
         if (url.includes("watch?v=")) {
@@ -778,73 +745,7 @@ async function Operations(data) {
     }
 }
 
-chrome.storage.local.get(['setting'], function(result) {
-    if (result?.setting) {
-        console.log({result : JSON.parse(result?.setting)})
-    //   Operations(result?.setting);
-    }
-});
 
-
-// on clink actions 
-
-
-//  if (item?.name?.toString()?.toLowerCase() == "shorts") {
-//                 if (isShorts !== item?.action) {
-//                     const visibility = (item?.action) ? false : true; 
-//                     console.log({visibility, state : item?.action, isShorts})
-//                     isShorts = item?.action;
-//                     hideElements('style-scope ytd-rich-shelf-renderer', true, visibility);
-//                     hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, visibility);
-//                     hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : visibility });
-//                     hideElementById("shorts-container", visibility);
-//                     hideElements('ytd-reel-shelf-renderer', false, visibility);
-//                 }
-    
-//             } else if (item?.name?.toString()?.toLowerCase() == "video suggestions") {
-//                 if (isSuggestion !== item?.action) {
-//                     const visibility = (item?.action) ? false : true; 
-//                     isSuggestion = item?.action;
-//                     hideChildElementById('columns', 'secondary', visibility);
-//                 }
-//               } else if (item?.name?.toString()?.toLowerCase() == "filter by keywords") {
-//                 if (isShorts !== item?.action) 
-//                     isFiltered = item?.action;
-//               } else if (item?.name?.toString()?.toLowerCase() == "picture in picture mode") {
-//                 if (isPip !== item?.action) {
-//                     const visibility = (item?.action) ? false : true;
-//                     CUSTOM_PARTS(isShorts,isSuggestion, item?.action, isVolumeBooster, isEqualizer, isHome, isHistory, isAds);
-//                     isPip = item?.action
-//                     addPiPButtonOnce(visibility);
-//                 }
-//               } else if (item?.name?.toString()?.toLowerCase() == "advanced volume booster") {
-//                 if (isVolumeBooster !== item?.action) {
-//                     const data = hanges?.setting?.newValue;
-//                     Operations(data)
-//                 }
-
-//               } else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer") {
-//                 if (isEqualizer !== item?.action) {
-//                      const data = hanges?.setting?.newValue;
-//                      Operations(data)
-//                 }
-//               }
-//               else if (item?.name?.toString()?.toLowerCase() == "home feed") {
-//                 if (isHome !== item?.action) {
-//                     const visibility = (item?.action) ? false : true; 
-//                     initalizerHome = visibility;
-//                     isHome = item?.action;
-//                     hideSideBarElements({ list: ['.style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home', visibility : visibility });
-//                     replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png', visibility);
-//                 }
-//               } else if (item?.name?.toString()?.toLowerCase() == "history") {
-//                 if (isHistory !== item?.action) {
-//                     const visibility = (item?.action) ? false : true; 
-//                     isHistory = item?.action;
-//                     hideElements('style-scope ytd-browse-feed-actions-renderer', true, visibility);
-//                     hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history', visibility : visibility });
-//                 }
-//               }
 
 
 // Shorts visibility control
@@ -879,15 +780,17 @@ function handlePiPMode(visibility) {
 // Advanced volume booster control
 function handleVolumeBooster(visibility) {
     isVolumeBooster = !visibility;
-    initialized = !visibility;
-    VOLUME_EQUALIZER_AND_BOOSTER(true, false, visibility)
+    if (!audioContext) 
+        initialized = true;
+    VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)
 }
 
 // Precision audio equalizer control
 function handleEqualizer(visibility) {
     isEqualizer = !visibility;
-    initialized = !visibility;
-    VOLUME_EQUALIZER_AND_BOOSTER(false, true, visibility)
+    if (!audioContext) 
+        initialized = true;
+    VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
 }
 
 // Home feed control
@@ -900,12 +803,10 @@ function handleHomeFeed(visibility) {
 // History visibility control
 function handleHistory(visibility) {
     isHistory = !visibility;
-    hideElements('style-scope ytd-browse-feed-actions-renderer', true, visibility);
-    hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history', visibility });
+    hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
+    // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer'], text: 'history', visibility });
 
 }
-
-
 
 function isValueChanged({preValue, newValue, funCall, params, visibility = false}) {
     if (preValue !== newValue)
@@ -940,15 +841,26 @@ function handleUIUpdateOnScreenVisible(data) {
             else if (name.toLowerCase() == "precision audio equalizer")
                 isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
         }) 
+
+        setTimeout(() => { 
+            CUSTOM_PARTS_EXECUTION()
+        }, 1000) 
     }
 }
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
     console.log("Changes", changes);
-    
         if (changes?.setting?.newValue) {
             handleUIUpdateOnScreenVisible(changes?.setting?.newValue);
         }
+});
+
+
+chrome.storage.local.get(['setting'], function(result) {
+    if (result?.setting) {
+        console.log({result : JSON.parse(result?.setting)})
+        handleUIUpdateOnScreenVisible(result?.setting);
+    }
 });
 
 

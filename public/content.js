@@ -518,7 +518,7 @@ const hideChildElementById = (rootId, childId, visibility = false) => {
 const hideElementByShortsClassName = (className, num, visibility = false) => {
             const elements = document.getElementsByClassName(className);
             if (elements?.length > 0) {
-                if (visibility) 
+                if (!visibility) 
                     elements[num].hidden = true;
                 else 
                     elements[num].hidden = false;
@@ -654,11 +654,11 @@ function CUSTOM_PARTS_EXECUTION() {
 
         if (isHistory) {
             hideElements('style-scope ytd-browse-feed-actions-renderer', true, false);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history' });
+            // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history' });
         } 
 
         if (isHome) {
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
+            // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
             replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
         }
 
@@ -674,14 +674,13 @@ function CUSTOM_PARTS_EXECUTION() {
             (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
         } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
             (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
-        } else if (url.includes("feed/history") && isHistory) {
-            // replaceContentWithMessage('#primary', 'This Section off by My Tube', 'icon16.png');
+        } else if (url.includes("feed/history")) {
+            if (isHistory)
+                hideElements('style-scope ytd-browse grid grid-6-columns', true, false);
+            else
+                hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
         }
 
-        // const video = document.querySelector('video');
-        // if (video && document.querySelector('.ad-showing')) {
-        //     video.currentTime = video.duration;
-        // }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
@@ -744,6 +743,96 @@ async function Operations(data) {
 
     }
 }
+
+
+// remove ads from mx player randomly
+
+function getAdTimestamps(videoLength) {
+  // Convert the video length ("hh:mm:ss") into total seconds
+  const [hours, minutes, seconds] = videoLength.split(":").map(Number);
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+  // Calculate ad intervals (4 evenly spaced points)
+  const interval = totalSeconds / 5;
+
+  // Generate timestamps
+  const timestamps = [];
+  for (let i = 1; i <= 4; i++) {
+    const adTimeInSeconds = Math.floor(interval * i);
+
+    const adMinutes = Math.floor(adTimeInSeconds / 60);
+    const adSeconds = adTimeInSeconds % 60;
+
+    // Format the timestamp as "mm:ss"
+    timestamps.push(`${adMinutes}:${adSeconds.toString().padStart(2, "0")}`);
+  }
+
+  return timestamps;
+}
+
+function manageAds(videoLength) {
+  const ads = new Set(); // Use a set to ensure uniqueness
+  const timestamps = getAdTimestamps(videoLength);
+
+  // Function to add an ad
+  function addAd() {
+    if (ads.size < 4) {
+      const available = timestamps.filter((time) => !ads.has(time));
+      if (available.length > 0) {
+        const randomAd = available[Math.floor(Math.random() * available.length)];
+        ads.add(randomAd);
+        console.log(`Ad added at: ${randomAd}`);
+      } else {
+        console.log("No available timestamps for adding ads.");
+      }
+    } else {
+      console.log("Maximum number of ads already added.");
+    }
+  }
+
+  // Function to remove an ad
+  function removeAd() {
+    if (ads.size > 0) {
+      const randomAd = Array.from(ads)[Math.floor(Math.random() * ads.size)];
+      ads.delete(randomAd);
+      console.log(`Ad removed from: ${randomAd}`);
+    } else {
+      console.log("No ads to remove.");
+    }
+  }
+
+  // Function to list all current ads
+  function listAds() {
+    console.log("Current ads:", Array.from(ads));
+  }
+
+  return { addAd, removeAd, listAds };
+}
+
+// Function to randomly toggle ads in MX Player
+function mxAdsToggle() {
+  Array.from(document.getElementsByTagName('iframe')).forEach((iframe) => {
+    if (iframe.src.includes('imasdk.googleapis.com')) {
+      if (Math.random() > 0.5) { // 50% chance to remove the ad
+        iframe.remove();
+        console.log('Ad iframe removed successfully.');
+      } else {
+        console.log('Ad iframe left intact.');
+      }
+    }
+  });
+}
+
+// Example usage
+const videoLength = "1:03:42"; // hh:mm:ss
+const adManager = manageAds(videoLength);
+adManager.addAd();
+adManager.addAd();
+adManager.removeAd();
+adManager.listAds();
+
+// Randomly toggle ads
+mxAdsToggle();
 
 
 

@@ -68,11 +68,15 @@ const SettingItem = ({
               if (e) {
                 onSwitchOn();
               }
+              
+              if (e && isExtenstionActiveBtn) {
+                onSwitchOff();
+              }
 
-              if (!e) {
-                onSwitchOff();
-              } else if (e && isExtenstionActiveBtn) {
-                onSwitchOff();
+              // on refresh items
+
+              if (item.name.toString().toLowerCase() == "filter by keywords" && !e) {
+                onSwitchOff()
               }
 
             }}

@@ -55,15 +55,15 @@ const Home = ({setScreen}) => {
                  setScreen("keywords");
                 else if (item?.name?.toString()?.toLowerCase() == "privacy policy")
                  window?.open(item?.url);
+                else if (item?.name?.toString()?.toLowerCase() == "feedback & support")
+                 window?.open(item?.url);
                 
               }} 
               isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
               onSwitchOff={handleRemoveItem}
               onSwitchOn={() => {
-               if (item?.name?.toString()?.toLowerCase() == "advanced volume booster")
-                  handleRemoveItem();
-                else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer")
-                  handleRemoveItem();
+              //  if (item?.name?.toString()?.toLowerCase() == "filter by keywords")
+              //     handleRemoveItem();
               }}
               />
             )

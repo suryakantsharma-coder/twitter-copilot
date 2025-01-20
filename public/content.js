@@ -19,6 +19,7 @@ let ShowText = false; // Prevent multiple initializations
  let isEqualizer = false;
  let isHome = false;
  let isHistory = false;
+ let isComments = false;
  let initalizerHome = false;
 
 function REMOVE_SCRIPT() {
@@ -73,7 +74,7 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
       lastExecution = now;
 
       const ristrict_keyword = events || ['strange parts', 'INDIAN RAILWAYS FAN CLUB -by SATYA', 'yatri doctor', 'Destroyed Phone Restore', 'Mat Armstrong', 'JerryRigEverything', 'Linus Tech Tips', 'Joe HaTTab', 'Gyan Therapy'];
-      hideElementsByTagName([ (isShorts) && 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
+      hideElementsByTagName(['ytd-rich-shelf-renderer', 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
       hideContentChips(); // hide home screen chips;
     });
 
@@ -425,8 +426,12 @@ function VOLUME_EQUALIZER_AND_BOOSTER(isVolume, isEqualizer, visibility = false,
     if (ISVOLUMEBOOSTER) {
         needToCreate = setVisibility('.volume-control-box', visibility);
         createVolumeControlPanel(controlPanel);
-    } else {
+    } else if (isEqualizer) {
         needToCreate = setVisibility('.equalizer-control-box', visibility);
+        createEqualizerControlPanel(controlPanel);
+    } else if (ISVOLUMEBOOSTER && isEqualizer) {
+        needToCreate = setVisibility('.volume-control-box', visibility);
+        createVolumeControlPanel(controlPanel);
         createEqualizerControlPanel(controlPanel);
     }
 
@@ -497,6 +502,11 @@ const mxAds = () => {
 const hideElementById = (id, visibility = false) => {
             const element = document.getElementById(id);
             if (element && !visibility) element.style.display = "none";
+            else  if (element && visibility) element.style.display = "flex";
+};
+const hideElementRemovedById = (id, visibility = false) => {
+            const element = document.getElementById(id);
+            if (element && !visibility) element.remove();
             else  if (element && visibility) element.style.display = "flex";
 };
 
@@ -647,21 +657,25 @@ function CUSTOM_PARTS_EXECUTION() {
 
         if (isShorts) {
             hideElements('style-scope ytd-rich-shelf-renderer');
-            hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2);
+            handleURL({ fn : () => hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2), includesUrl : "/@"});
             hideElementById("shorts-container");
             hideElements('ytd-reel-shelf-renderer', false);
+            hideElements('ytd-shorts', false, false);
+            handleURL({
+                fn: () => {
+                    hideElements('ytd-shorts', false, false);
+                }, includesUrl: "https://www.youtube.com/shorts/"
+            });
         }
-
-        if (isHistory) {
-            hideElements('style-scope ytd-browse-feed-actions-renderer', true, false);
-            // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history' });
-        } 
+    
 
         if (isHome) {
             // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
             replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
         }
 
+        if (isComments)
+            hideElements('style-scope ytd-comments', true, false);
 
         if (isSuggestion) hideChildElementById('columns', 'secondary') 
           
@@ -671,14 +685,27 @@ function CUSTOM_PARTS_EXECUTION() {
 
         const url = window.location.href;
         if (url.includes("watch?v=")) {
-            (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
+            if (isVolumeBooster) {
+                VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, true)
+            }
+            
+            if (isEqualizer) {
+                 VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false)
+            }
+
+
         } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
-            (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
+            (isVolumeBooster || isEqualizer) && VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, isVolumeBooster);
         } else if (url.includes("feed/history")) {
             if (isHistory)
                 hideElements('style-scope ytd-browse grid grid-6-columns', true, false);
             else
                 hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
+        } else if (url.includes("shorts/")) {
+            if (isShorts) {
+                hideElementRemovedById("shorts-container", visibility);
+                document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
+            }
         }
 
     });
@@ -729,8 +756,8 @@ async function Operations(data) {
         })
 
 
-        if (isFiltered && events?.length > 0)
-          FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
+        // if (isFiltered && events?.length > 0)
+        //   FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
   
         // if (isAds) {
         //   CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
@@ -744,6 +771,16 @@ async function Operations(data) {
     }
 }
 
+
+// url specific Operations
+function handleURL({fn, specificUrl = "", includesUrl = ""}) {
+    const url = window.location.href;
+    if (url == specificUrl) {
+      fn();
+    } else if (url.includes(includesUrl)) {
+      fn();
+    }
+}
 
 // remove ads from mx player randomly
 
@@ -823,28 +860,23 @@ function mxAdsToggle() {
   });
 }
 
-// Example usage
-const videoLength = "1:03:42"; // hh:mm:ss
-const adManager = manageAds(videoLength);
-adManager.addAd();
-adManager.addAd();
-adManager.removeAd();
-adManager.listAds();
-
-// Randomly toggle ads
-mxAdsToggle();
-
-
-
-
 // Shorts visibility control
 function handleShorts(visibility) {
     isShorts = !visibility;
     hideElements('style-scope ytd-rich-shelf-renderer', true, visibility);
     hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, visibility);
-    hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility });
+    // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility });
     hideElementById("shorts-container", visibility);
     hideElements('ytd-reel-shelf-renderer', false, visibility);
+    hideElements('style-scope ytd-page-manager', false, visibility);
+    // mute shorts section 
+    handleURL({
+        fn: () => {
+            document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
+            console.log("Shorts section muted.");
+        }, includesUrl: "https://www.youtube.com/shorts/"
+    });
+    
 }
 
 // Video suggestions visibility control
@@ -857,6 +889,10 @@ function handleVideoSuggestions(visibility) {
 function handleFilterByKeywords(item) {
     if (isFiltered !== item?.action) {
         isFiltered = item?.action;
+        const url = window.location.href;
+        if (url == "https://www.youtube.com/") {
+            handleFiltered();
+        }
     }
 }
 
@@ -871,7 +907,11 @@ function handleVolumeBooster(visibility) {
     isVolumeBooster = !visibility;
     if (!audioContext) 
         initialized = true;
-    VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)
+    const url = window.location.href;
+    if (url.includes("watch?v=")) 
+        VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)
+    else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
+        VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)    
 }
 
 // Precision audio equalizer control
@@ -879,7 +919,11 @@ function handleEqualizer(visibility) {
     isEqualizer = !visibility;
     if (!audioContext) 
         initialized = true;
-    VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
+    const url = window.location.href;
+    if (url.includes("watch?v=")) 
+        VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
+    else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
+        VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
 }
 
 // Home feed control
@@ -893,8 +937,18 @@ function handleHomeFeed(visibility) {
 function handleHistory(visibility) {
     isHistory = !visibility;
     hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
+    // hideElements({list : ['style-scope ytd-page-manager'], text : true, visibility})
     // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer'], text: 'history', visibility });
 
+}
+
+// hide comment section 
+
+function hideComments(visibility) {
+    isComments = !visibility;
+    const url = window.location.href;
+    if (url.includes("watch?v=")) 
+        hideElements('style-scope ytd-comments', true, visibility);
 }
 
 function isValueChanged({preValue, newValue, funCall, params, visibility = false}) {
@@ -929,6 +983,8 @@ function handleUIUpdateOnScreenVisible(data) {
                 isValueChanged({ preValue: isVolumeBooster, newValue: item?.action, funCall: handleVolumeBooster, visibility: !item?.action });
             else if (name.toLowerCase() == "precision audio equalizer")
                 isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
+            else if (name.toLowerCase() == "comments")
+                isValueChanged({ preValue: isComments, newValue: item?.action, funCall: hideComments, visibility: !item?.action });
         }) 
 
         setTimeout(() => { 
@@ -945,9 +1001,19 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 
+async function handleFiltered() {
+    const responseEvent = await chrome.storage.local.get(['keywords']);
+    let events = [];
+    if (responseEvent?.keywords) {
+        events = JSON.parse(responseEvent?.keywords);
+        FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
+    }
+    
+}
+
 chrome.storage.local.get(['setting'], function(result) {
     if (result?.setting) {
-        console.log({result : JSON.parse(result?.setting)})
+        console.log({ result: JSON.parse(result?.setting) })
         handleUIUpdateOnScreenVisible(result?.setting);
     }
 });
@@ -955,7 +1021,7 @@ chrome.storage.local.get(['setting'], function(result) {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "remove") {
-        // window.location.reload();
+        window.location.reload();
         sendResponse({ success: true });
     }
 });

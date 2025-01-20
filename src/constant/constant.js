@@ -1,10 +1,10 @@
 export const settingOptions = [
-        {
-          name : "Block Ads",
-          description : "Disable YouTube And Mx Player Ads.",
-          type : 'switch',
-          action : false
-        },
+        // {
+        //   name : "Block Ads",
+        //   description : "Disable YouTube And Mx Player Ads.",
+        //   type : 'switch',
+        //   action : false
+        // },
         {
           name : "Home Feed",
           description : "Turn off YouTube Home Feed to remove video recommendations from the homepage.",
@@ -26,6 +26,12 @@ export const settingOptions = [
         {
           name : "Video Suggestions",
           description : "Disable suggested videos on YouTube.",
+          type : 'switch',
+          action : false
+        },
+        {
+          name : "Comments",
+          description : "Disable YouTube Comments.",
           type : 'switch',
           action : false
         },
@@ -67,7 +73,14 @@ export const settingOptions = [
           url : "https://sites.google.com/view/privacy-policy-for-my-tube/home"
         },
         {
-          name : "clear settings",
+          name : "Feedback & Support",
+          description : "contact us for any feedback or support.",
+          type : 'btn',
+          action : false,
+          url : "https://t.me/MyTubeFeedbackAndSupport"
+        },
+        {
+          name : "Clear settings",
           description : "Undo your changes.",
           type : 'btn',
           action : false

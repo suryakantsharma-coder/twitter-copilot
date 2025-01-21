@@ -51,8 +51,16 @@ const Home = ({setScreen}) => {
                 console.log({logo : item?.name?.toString()?.toLowerCase() })
                 if (item?.name?.toString()?.toLowerCase() == "clear settings") 
                   clearSettingState();
-                else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action)
-                 setScreen("keywords");
+                else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) {
+                  setScreen("keywords");
+                  const filter =  {
+                    name : "Filter By Keywords",
+                    description : "Filter YouTube feeds using your keywords to stay focused and improve your viewing experience.",
+                    type : 'switch',
+                    action : false
+                  }
+                  handleSettingState(filter, false);
+                }
                 else if (item?.name?.toString()?.toLowerCase() == "privacy policy")
                  window?.open(item?.url);
                 else if (item?.name?.toString()?.toLowerCase() == "feedback & support")

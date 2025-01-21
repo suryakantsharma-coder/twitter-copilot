@@ -476,18 +476,18 @@ const hideElements = (selector, byClass = true, visibility = false) => {
 };
     
 const hideSideBarElements = ({ list, text, visibility = false}) => {
-            list.forEach(className => {
-                Array.from(document.getElementsByClassName(className)).forEach(item => {
-                    if (item.innerText.toLowerCase() === text.toLowerCase()) {
-                        if (!visibility)
-                            item.hidden = true;
-                        else {
-                            item.hidden = false;
-                            console.log({element : item.hidden})
-                        }
-                    }
-                });
-            });
+    list.forEach(className => {
+        Array.from(document.getElementsByClassName(className)).forEach(item => {
+            if (item.innerText.toLowerCase() === text.toLowerCase()) {
+                if (!visibility)
+                    item.hidden = true;
+                else {
+                    item.hidden = false;
+                    console.log({ element: item.hidden })
+                }
+            }
+        });
+    });
 };
 
 const mxAds = () => {
@@ -661,11 +661,7 @@ function CUSTOM_PARTS_EXECUTION() {
             hideElementById("shorts-container");
             hideElements('ytd-reel-shelf-renderer', false);
             hideElements('ytd-shorts', false, false);
-            handleURL({
-                fn: () => {
-                    hideElements('ytd-shorts', false, false);
-                }, includesUrl: "https://www.youtube.com/shorts/"
-            });
+            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : false });
         }
     
 
@@ -703,8 +699,8 @@ function CUSTOM_PARTS_EXECUTION() {
                 hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
         } else if (url.includes("shorts/")) {
             if (isShorts) {
-                hideElementRemovedById("shorts-container", visibility);
                 document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
+                hideElementRemovedById("shorts-container", visibility);
             }
         }
 
@@ -869,6 +865,8 @@ function handleShorts(visibility) {
     hideElementById("shorts-container", visibility);
     hideElements('ytd-reel-shelf-renderer', false, visibility);
     hideElements('style-scope ytd-page-manager', false, visibility);
+    hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : visibility });
+
     // mute shorts section 
     handleURL({
         fn: () => {

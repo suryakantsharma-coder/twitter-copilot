@@ -70,14 +70,16 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
 
 
-     observer = new MutationObserver(() => {
+    observer = new MutationObserver(() => {
       const now = Date.now();
       if (now - lastExecution < throttleTime) return;
       lastExecution = now;
 
-      const ristrict_keyword = events || ['strange parts', 'INDIAN RAILWAYS FAN CLUB -by SATYA', 'yatri doctor', 'Destroyed Phone Restore', 'Mat Armstrong', 'JerryRigEverything', 'Linus Tech Tips', 'Joe HaTTab', 'Gyan Therapy'];
-      hideElementsByTagName(['ytd-rich-shelf-renderer', 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
-      hideContentChips(); // hide home screen chips;
+      const ristrict_keyword = events || [];
+       if (ristrict_keyword?.length > 0) {
+          hideElementsByTagName(['ytd-rich-shelf-renderer', 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
+          hideContentChips(); // hide home screen chips;
+        }
     });
 
     // Start observing changes in the body

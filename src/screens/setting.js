@@ -77,8 +77,7 @@ const SettingItem = ({
 
               if (item.name.toString().toLowerCase() == "filter by keywords" && !e) {
                 onSwitchOff()
-              }
-
+              } 
             }}
         />
         }

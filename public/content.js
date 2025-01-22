@@ -22,6 +22,8 @@ let ShowText = false; // Prevent multiple initializations
  let isComments = false;
  let initalizerHome = false;
 
+
+
 function REMOVE_SCRIPT() {
     if (observer) {
         observer.disconnect();
@@ -353,6 +355,8 @@ function createEqualizerControlPanel(controlPanel) {
             slider.step = 1;
             slider.style.transform = 'rotate(-90deg)';
             slider.style.height = '150px';
+            slider.style.cursor = 'pointer';
+            slider.classList.add('custom-slider');
             slider.oninput = () => {
                 equalizerNodes[index].gain.value = parseFloat(slider.value);
             };
@@ -378,6 +382,7 @@ function createVolumeControlPanel(controlPanel) {
 
     // const volumeSlider = createSlider(1, 3, 0.1, (e) => gainNode.gain.value = e.target.value);
     const volumeSlider = document.createElement('input');
+    volumeSlider.classList.add('custom-slider');
     volumeSlider.type = 'range';
     volumeSlider.min = 1;
     volumeSlider.max = 3;
@@ -385,6 +390,7 @@ function createVolumeControlPanel(controlPanel) {
     volumeSlider.step = 0.1;
     volumeSlider.style.width = "96%";
     volumeSlider.style.marginBottom = "20px";
+    volumeSlider.style.cursor = 'pointer';
     volumeSlider.oninput = () => {
         gainNode.gain.value = parseFloat(volumeSlider.value);
     };
@@ -483,12 +489,60 @@ const hideSideBarElements = ({ list, text, visibility = false}) => {
                     item.hidden = true;
                 else {
                     item.hidden = false;
-                    console.log({ element: item.hidden })
                 }
-            }
+            } else if (item.innerText.toLowerCase()?.trim() == "" &&  visibility) {
+                item.hidden = false;
+            };
         });
     });
 };
+
+const handleVideoSize = () => {
+    // const element = document.querySelector('video');
+    // const controls = document.querySelector('.ytp-chrome-bottom');
+    // const container = document.querySelector('#columns');
+    // const seekBar = document.querySelector('.ytp-chapter-hover-container');
+    //     if (element) {
+    //         element.style.width= "100%";
+    //         element.style.height="auto";
+    //         element.style.left="0px";
+    //         element.style.top="0px";
+    //     }
+    
+    // if (controls) {
+    //     controls.style.width = "99%";
+    //     controls.style.left = "12px";
+    // }
+
+    // if (container) {
+    //     container.style.width = "10%";
+    // }
+
+    // if (seekBar) {
+    //     controls.style.width = "99%";
+    // }
+
+  // Hide the related videos section
+  const secondarySection = document.querySelector("#secondary");
+  if (secondarySection) {
+    secondarySection.style.display = "none";
+  }
+
+  // Adjust the main player container to center
+  const primarySection = document.querySelector("#primary");
+  if (primarySection) {
+    primarySection.style.margin = "0 auto";
+    primarySection.style.maxWidth = "1000px"; // Adjust width as needed
+  }
+
+  // Adjust the player size if necessary
+  const player = document.querySelector("#player");
+  if (player) {
+    player.style.margin = "0 auto";
+    player.style.display = "block";
+  }
+
+}
 
 const mxAds = () => {
             Array.from(document.getElementsByTagName('iframe')).forEach(iframe => {
@@ -673,7 +727,10 @@ function CUSTOM_PARTS_EXECUTION() {
         if (isComments)
             hideElements('style-scope ytd-comments', true, false);
 
-        if (isSuggestion) hideChildElementById('columns', 'secondary') 
+        if (isSuggestion) {
+            handleVideoSize();
+            hideChildElementById('columns', 'secondary') 
+        }
           
 
         if (isPip) addPiPButtonOnce() 
@@ -880,6 +937,7 @@ function handleShorts(visibility) {
 // Video suggestions visibility control
 function handleVideoSuggestions(visibility) {
     isSuggestion = !visibility;
+    handleVideoSize();
     hideChildElementById('columns', 'secondary', visibility);
 }
 

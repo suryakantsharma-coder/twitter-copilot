@@ -70,8 +70,8 @@ const Home = ({setScreen}) => {
               isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
               onSwitchOff={handleRemoveItem}
               onSwitchOn={() => {
-              //  if (item?.name?.toString()?.toLowerCase() == "filter by keywords")
-              //     handleRemoveItem();
+               if (item?.name?.toString()?.toLowerCase() == "my tube active")
+                  handleRemoveItem();
               }}
               />
             )

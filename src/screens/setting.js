@@ -57,7 +57,6 @@ const SettingItem = ({
             checked={isActive} 
             disabled={!isExtensionActive} 
             onChange={(e) => {
-              console.log({e})
               setIsActive(e)
               onStateChange(e)
 
@@ -71,7 +70,11 @@ const SettingItem = ({
               
               if (e && isExtenstionActiveBtn) {
                 onSwitchOff();
-              }
+              } 
+              
+              if (!e && isExtenstionActiveBtn) {
+                onSwitchOff();
+              } 
 
               // on refresh items
 

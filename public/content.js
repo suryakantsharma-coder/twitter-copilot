@@ -388,7 +388,7 @@ function createVolumeControlPanel(controlPanel) {
     volumeSlider.max = 3;
     volumeSlider.value = 1;
     volumeSlider.step = 0.1;
-    volumeSlider.style.width = "96%";
+    volumeSlider.style.width = "100%";
     volumeSlider.style.marginBottom = "20px";
     volumeSlider.style.cursor = 'pointer';
     volumeSlider.oninput = () => {
@@ -497,51 +497,24 @@ const hideSideBarElements = ({ list, text, visibility = false}) => {
     });
 };
 
-const handleVideoSize = () => {
-    // const element = document.querySelector('video');
-    // const controls = document.querySelector('.ytp-chrome-bottom');
-    // const container = document.querySelector('#columns');
-    // const seekBar = document.querySelector('.ytp-chapter-hover-container');
-    //     if (element) {
-    //         element.style.width= "100%";
-    //         element.style.height="auto";
-    //         element.style.left="0px";
-    //         element.style.top="0px";
-    //     }
-    
-    // if (controls) {
-    //     controls.style.width = "99%";
-    //     controls.style.left = "12px";
-    // }
+const handleVideoSize = (visibility) => {
+    const playerOuterContainer = document.querySelector("#player-container-outer");
+    const title = document.querySelector("#below");
+    const isFullScreen = document.fullscreenElement;
+    const pixel = document.querySelector("video").style.width;
 
-    // if (container) {
-    //     container.style.width = "10%";
-    // }
+    if (playerOuterContainer && !visibility) {
+        playerOuterContainer.style.maxWidth = pixel;
+    }
 
-    // if (seekBar) {
-    //     controls.style.width = "99%";
-    // }
+    if (title && !visibility) {
+        title.style.maxWidth = pixel || "1280px";
+        title.style.margin = "0 auto";
+    } else if (title && visibility) {
+        title.style.width = "";
+        title.style.margin = ""
 
-  // Hide the related videos section
-  const secondarySection = document.querySelector("#secondary");
-  if (secondarySection) {
-    secondarySection.style.display = "none";
-  }
-
-  // Adjust the main player container to center
-  const primarySection = document.querySelector("#primary");
-  if (primarySection) {
-    primarySection.style.margin = "0 auto";
-    primarySection.style.maxWidth = "1000px"; // Adjust width as needed
-  }
-
-  // Adjust the player size if necessary
-  const player = document.querySelector("#player");
-  if (player) {
-    player.style.margin = "0 auto";
-    player.style.display = "block";
-  }
-
+    }
 }
 
 const mxAds = () => {
@@ -728,7 +701,7 @@ function CUSTOM_PARTS_EXECUTION() {
             hideElements('style-scope ytd-comments', true, false);
 
         if (isSuggestion) {
-            handleVideoSize();
+            handleVideoSize(false);
             hideChildElementById('columns', 'secondary') 
         }
           
@@ -743,17 +716,20 @@ function CUSTOM_PARTS_EXECUTION() {
             }
             
             if (isEqualizer) {
-                 VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false)
+                VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false)
             }
 
 
         } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
             (isVolumeBooster || isEqualizer) && VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, isVolumeBooster);
         } else if (url.includes("feed/history")) {
-            if (isHistory)
+            if (isHistory) {
                 hideElements('style-scope ytd-browse grid grid-6-columns', true, false);
-            else
+                hideElements('style-scope ytd-browse grid grid-5-columns', true, false);
+            } else {
                 hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
+                hideElements('style-scope ytd-browse grid grid-5-columns', true, true);
+            }
         } else if (url.includes("shorts/")) {
             if (isShorts) {
                 document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
@@ -937,7 +913,7 @@ function handleShorts(visibility) {
 // Video suggestions visibility control
 function handleVideoSuggestions(visibility) {
     isSuggestion = !visibility;
-    handleVideoSize();
+    handleVideoSize(visibility);
     hideChildElementById('columns', 'secondary', visibility);
 }
 
@@ -993,6 +969,7 @@ function handleHomeFeed(visibility) {
 function handleHistory(visibility) {
     isHistory = !visibility;
     hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
+    hideElements('style-scope ytd-browse grid grid-5-columns', true, visibility);
     // hideElements({list : ['style-scope ytd-page-manager'], text : true, visibility})
     // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer'], text: 'history', visibility });
 
@@ -1018,29 +995,35 @@ function visibilityOfElement({ visibility = false }) {
 
 }
 
-function handleUIUpdateOnScreenVisible(data) {
+async function handleUIUpdateOnScreenVisible(data) {
     if (data) {
         const setting = JSON.parse(data);
+        const response = await chrome.storage.local.get(['isActive']);
+        const isActive = response?.isActive;
         setting.map((item) => {
-            const {name} = item;
-            if (name.toLowerCase() == 'shorts')
-                isValueChanged({ preValue: isShorts, newValue: item?.action, funCall: handleShorts, visibility: !item?.action });
-            else if (name.toLowerCase() == 'video suggestions')
-                isValueChanged({ preValue: isSuggestion, newValue: item?.action, funCall: handleVideoSuggestions, visibility: !item?.action });
-            else if (name.toLowerCase() == 'home feed')
-                isValueChanged({ preValue: isHome, newValue: item?.action, funCall: handleHomeFeed, visibility: !item?.action });
-            else if (name.toLowerCase() == "history")
-                isValueChanged({ preValue: isHistory, newValue: item?.action, funCall: handleHistory, visibility: !item?.action });
-            else if (name.toLowerCase() == "picture in picture mode")
-                isValueChanged({ preValue: isPip, newValue: item?.action, funCall: handlePiPMode, visibility: !item?.action });
-            else if (name.toLowerCase() == "filter by keywords")
-                isValueChanged({ preValue: isFiltered, newValue: item?.action, funCall: handleFilterByKeywords, visibility: !item?.action });
-            else if (name.toLowerCase() == "advanced volume booster")
-                isValueChanged({ preValue: isVolumeBooster, newValue: item?.action, funCall: handleVolumeBooster, visibility: !item?.action });
-            else if (name.toLowerCase() == "precision audio equalizer")
-                isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
-            else if (name.toLowerCase() == "comments")
-                isValueChanged({ preValue: isComments, newValue: item?.action, funCall: hideComments, visibility: !item?.action });
+            const { name } = item;
+            if (isActive) {
+                if (name.toLowerCase() == 'shorts')
+                    isValueChanged({ preValue: isShorts, newValue: item?.action, funCall: handleShorts, visibility: !item?.action });
+                else if (name.toLowerCase() == 'video suggestions')
+                    isValueChanged({ preValue: isSuggestion, newValue: item?.action, funCall: handleVideoSuggestions, visibility: !item?.action });
+                else if (name.toLowerCase() == 'home feed')
+                    isValueChanged({ preValue: isHome, newValue: item?.action, funCall: handleHomeFeed, visibility: !item?.action });
+                else if (name.toLowerCase() == "history")
+                    isValueChanged({ preValue: isHistory, newValue: item?.action, funCall: handleHistory, visibility: !item?.action });
+                else if (name.toLowerCase() == "picture in picture mode")
+                    isValueChanged({ preValue: isPip, newValue: item?.action, funCall: handlePiPMode, visibility: !item?.action });
+                else if (name.toLowerCase() == "filter by keywords")
+                    isValueChanged({ preValue: isFiltered, newValue: item?.action, funCall: handleFilterByKeywords, visibility: !item?.action });
+                else if (name.toLowerCase() == "advanced volume booster")
+                    isValueChanged({ preValue: isVolumeBooster, newValue: item?.action, funCall: handleVolumeBooster, visibility: !item?.action });
+                else if (name.toLowerCase() == "precision audio equalizer")
+                    isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
+                else if (name.toLowerCase() == "comments")
+                    isValueChanged({ preValue: isComments, newValue: item?.action, funCall: hideComments, visibility: !item?.action });
+            } else {
+                console.log("my tube off")
+            }
         }) 
 
         setTimeout(() => { 

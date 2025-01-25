@@ -84,7 +84,6 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
     // Start observing changes in the body
     observer.observe(document.body, { childList: true, subtree: true });
-    // console.log("Throttled observer is running.");
 
 }
 
@@ -492,9 +491,7 @@ const hideSideBarElements = ({ list, text, visibility = false}) => {
                 else {
                     item.hidden = false;
                 }
-            } else if (item.innerText.toLowerCase()?.trim() == "" &&  visibility) {
-                item.hidden = false;
-            };
+            }
         });
     });
 };
@@ -503,7 +500,11 @@ const handleVideoSize = (visibility) => {
     const playerOuterContainer = document.querySelector("#player-container-outer");
     const title = document.querySelector("#below");
     const isFullScreen = document.fullscreenElement;
-    const pixel = document.querySelector("video").style.width;
+    const videoContainer = document.querySelector("video");
+    let pixel = 0;
+    if (videoContainer) {
+        pixel = videoContainer.style.width;
+    }
 
     if (playerOuterContainer && !visibility) {
         playerOuterContainer.style.maxWidth = pixel;
@@ -519,20 +520,12 @@ const handleVideoSize = (visibility) => {
     }
 }
 
-const mxAds = () => {
-            Array.from(document.getElementsByTagName('iframe')).forEach(iframe => {
-                if (iframe.src.includes('imasdk.googleapis.com')) {
-                    iframe.remove();
-                    console.log('Iframe removed successfully.');
-                }
-            });
-};
-
 const hideElementById = (id, visibility = false) => {
             const element = document.getElementById(id);
             if (element && !visibility) element.style.display = "none";
             else  if (element && visibility) element.style.display = "flex";
 };
+
 const hideElementRemovedById = (id, visibility = false) => {
             const element = document.getElementById(id);
             if (element && !visibility) element.remove();
@@ -601,80 +594,6 @@ const addPiPButtonOnce = (visibility = false) => {
 
 };
 
-
-function CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolume, isEqualizer, isHome, isHistory, isAdBlocker = false, visibility = false) {
-    const throttleTime = 200;
-    let lastExecution = 0;
-
-    observer = new MutationObserver(() => {
-        const now = Date.now();
-        if (now - lastExecution < throttleTime) return;
-        lastExecution = now;
-
-        if (isAdBlocker) {
-            // hideElements('ad-container');
-            // hideElements('video-ads');
-            // hideElements('ytp-ad-module');
-            // mxAds();
-        }
-
-        if (isShorts) {
-            hideElements('style-scope ytd-rich-shelf-renderer');
-            // hideElements('shortsLockupViewModelHost style-scope ytd-rich-item-renderer');
-            hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts' });
-            hideElementById("shorts-container");
-            hideElements('ytd-reel-shelf-renderer', false);
-        } else {
-            hideElements('style-scope ytd-rich-shelf-renderer', false, true);
-            // hideElements('shortsLockupViewModelHost style-scope ytd-rich-item-renderer');
-            hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, true);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : true });
-            hideElementById("shorts-container", true);
-            hideElements('ytd-reel-shelf-renderer', false, true);
-
-        }
-
-        if (isHistory) {
-            hideElements('style-scope ytd-browse-feed-actions-renderer', true, false);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history' });
-        } else {
-            hideElements('style-scope ytd-browse-feed-actions-renderer', true, true);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'history', vsibility : true });
-        }
-
-        if (isHome) {
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
-            replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
-        } else { 
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home', visibility : true });   
-            replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png', true);
-        }
-
-        if (isSuggestion) hideChildElementById('columns', 'secondary') 
-            else hideChildElementById('columns', 'secondary', true);
-
-        if (isPip) addPiPButtonOnce() 
-            else if (isPip && !visibility) addPiPButtonOnce(true);
-
-        const url = window.location.href;
-        if (url.includes("watch?v=")) {
-            (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
-        } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
-            (isVolume || isEqualizer) && VOLUME_EQULIZER(isVolume, isEqualizer);
-        } else if (url.includes("feed/history") && isHistory) {
-            // replaceContentWithMessage('#primary', 'This Section off by My Tube', 'icon16.png');
-        }
-
-        // const video = document.querySelector('video');
-        // if (video && document.querySelector('.ad-showing')) {
-        //     video.currentTime = video.duration;
-        // }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
 function CUSTOM_PARTS_EXECUTION() {
     const throttleTime = 200;
     let lastExecution = 0;
@@ -685,121 +604,88 @@ function CUSTOM_PARTS_EXECUTION() {
         lastExecution = now;
 
         if (isShorts) {
-            hideElements('style-scope ytd-rich-shelf-renderer');
-            handleURL({ fn : () => hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2), includesUrl : "/@"});
-            hideElementById("shorts-container");
-            hideElements('ytd-reel-shelf-renderer', false);
-            hideElements('ytd-shorts', false, false);
-            hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : false });
+            try {
+                hideElements('style-scope ytd-rich-shelf-renderer');
+                handleURL({ fn : () => hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2), includesUrl : "/@"});
+                hideElementById("shorts-container");
+                hideElements('ytd-reel-shelf-renderer', false);
+                hideElements('ytd-shorts', false, false);
+                hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : false });
+            } catch (err) { console.log({err : "short"})}
+            
         }
     
 
         if (isHome) {
-            // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home' });
-            replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
+            try {
+                replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png');
+            } catch (err) { console.log({err : "home feed"})}
         }
 
-        if (isComments)
-            hideElements('style-scope ytd-comments', true, false);
+        if (isComments) {
+            try {
+                hideElements('style-scope ytd-comments', true, false);
+            } catch (err) { console.log({err : "comments"})}
+        }
 
         if (isSuggestion) {
-            handleVideoSize(false);
-            hideChildElementById('columns', 'secondary') 
+            try {
+                handleVideoSize(false);
+                hideChildElementById('columns', 'secondary') 
+            } catch (err) { console.log({err : "suggestions"})}
         }
           
 
-        if (isPip) addPiPButtonOnce() 
+        if (isPip) {
+            try {
+                addPiPButtonOnce()
+            } catch (err) {
+                console.log("pip")
+            }
+        }
         
 
         const url = window.location.href;
         if (url.includes("watch?v=")) {
-            if (isVolumeBooster) {
-                VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, true)
-            }
-            
-            if (isEqualizer) {
-                VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false)
+            try {
+                if (isVolumeBooster) {
+                    VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, true)
+                }
+                
+                if (isEqualizer) {
+                    VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false)
+                }
+            } catch (err) {
+                console.log(err);
             }
 
 
-        } else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) {
-            (isVolumeBooster || isEqualizer) && VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, isVolumeBooster);
         } else if (url.includes("feed/history")) {
-            if (isHistory) {
-                hideElements('style-scope ytd-browse grid grid-6-columns', true, false);
-                hideElements('style-scope ytd-browse grid grid-5-columns', true, false);
-            } else {
-                hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
-                hideElements('style-scope ytd-browse grid grid-5-columns', true, true);
+            try {
+                if (isHistory) {
+                    hideElements('style-scope ytd-browse grid grid-6-columns', true, false);
+                    hideElements('style-scope ytd-browse grid grid-5-columns', true, false);
+                } else {
+                    hideElements('style-scope ytd-browse grid grid-6-columns', true, true);
+                    hideElements('style-scope ytd-browse grid grid-5-columns', true, true);
+                }
+            } catch (err) {
+                console.log(err);
             }
         } else if (url.includes("shorts/")) {
-            if (isShorts) {
-                document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
-                hideElementRemovedById("shorts-container", visibility);
+            try {
+                if (isShorts) {
+                    document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
+                    hideElementRemovedById("shorts-container", visibility);
+                }
+            } catch (err) {
+                console.log(err);
             }
         }
 
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
-}
-
-async function Operations(data) {
- if (data) {
-      const setting = JSON.parse(data);
-      const response = await chrome.storage.local.get(['isActive']);
-      const responseEvent = await chrome.storage.local.get(['keywords']);
-      const isActive = response?.isActive;
-      let events = [];
-      if (responseEvent?.keywords) 
-      events = JSON.parse(responseEvent?.keywords);
-
-      if (isActive) {
-        setting.map((item) => {
-          if (item?.name?.toString()?.toLowerCase() == "shorts") {
-            if (isShorts !== item?.action) 
-                isShorts = item?.action;
-          } else if (item?.name?.toString()?.toLowerCase() == "block ads") {
-            if (isAds !== item?.action) 
-                isAds = item?.action;
-          }else if (item?.name?.toString()?.toLowerCase() == "video suggestions") {
-            if (isSuggestion !== item?.action) 
-                isSuggestion = item?.action;
-          } else if (item?.name?.toString()?.toLowerCase() == "filter by keywords") {
-            if (isFiltered !== item?.action) 
-                isFiltered = item?.action;
-          } else if (item?.name?.toString()?.toLowerCase() == "picture in picture mode") {
-            if (isPip !== item?.action) 
-                isPip = item?.action
-          } else if (item?.name?.toString()?.toLowerCase() == "advanced volume booster") {
-            if (isVolumeBooster !== item?.action) 
-                isVolumeBooster = item?.action
-          } else if (item?.name?.toString()?.toLowerCase() == "precision audio equalizer") {
-            if (isEqualizer !== item?.action) 
-                isEqualizer = item?.action
-          } else if (item?.name?.toString()?.toLowerCase() == "home feed") {
-            if (isHome !== item?.action) 
-                isHome = item?.action
-          } else if (item?.name?.toString()?.toLowerCase() == "history") {
-            if (isHistory !== item?.action) 
-                isHistory = item?.action
-          }
-        })
-
-
-        // if (isFiltered && events?.length > 0)
-        //   FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
-  
-        // if (isAds) {
-        //   CUSTOM_PARTS_WITH_AD_BLOCKER(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
-        // } else {
-        //   CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory)
-        // }
-        
-        CUSTOM_PARTS(isShorts, isSuggestion, isPip, isVolumeBooster, isEqualizer, isHome, isHistory, isAds)
-      }
-
-    }
 }
 
 
@@ -813,165 +699,121 @@ function handleURL({fn, specificUrl = "", includesUrl = ""}) {
     }
 }
 
-// remove ads from mx player randomly
-
-function getAdTimestamps(videoLength) {
-  // Convert the video length ("hh:mm:ss") into total seconds
-  const [hours, minutes, seconds] = videoLength.split(":").map(Number);
-  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-
-  // Calculate ad intervals (4 evenly spaced points)
-  const interval = totalSeconds / 5;
-
-  // Generate timestamps
-  const timestamps = [];
-  for (let i = 1; i <= 4; i++) {
-    const adTimeInSeconds = Math.floor(interval * i);
-
-    const adMinutes = Math.floor(adTimeInSeconds / 60);
-    const adSeconds = adTimeInSeconds % 60;
-
-    // Format the timestamp as "mm:ss"
-    timestamps.push(`${adMinutes}:${adSeconds.toString().padStart(2, "0")}`);
-  }
-
-  return timestamps;
-}
-
-function manageAds(videoLength) {
-  const ads = new Set(); // Use a set to ensure uniqueness
-  const timestamps = getAdTimestamps(videoLength);
-
-  // Function to add an ad
-  function addAd() {
-    if (ads.size < 4) {
-      const available = timestamps.filter((time) => !ads.has(time));
-      if (available.length > 0) {
-        const randomAd = available[Math.floor(Math.random() * available.length)];
-        ads.add(randomAd);
-        console.log(`Ad added at: ${randomAd}`);
-      } else {
-        console.log("No available timestamps for adding ads.");
-      }
-    } else {
-      console.log("Maximum number of ads already added.");
-    }
-  }
-
-  // Function to remove an ad
-  function removeAd() {
-    if (ads.size > 0) {
-      const randomAd = Array.from(ads)[Math.floor(Math.random() * ads.size)];
-      ads.delete(randomAd);
-      console.log(`Ad removed from: ${randomAd}`);
-    } else {
-      console.log("No ads to remove.");
-    }
-  }
-
-  // Function to list all current ads
-  function listAds() {
-    console.log("Current ads:", Array.from(ads));
-  }
-
-  return { addAd, removeAd, listAds };
-}
-
-// Function to randomly toggle ads in MX Player
-function mxAdsToggle() {
-  Array.from(document.getElementsByTagName('iframe')).forEach((iframe) => {
-    if (iframe.src.includes('imasdk.googleapis.com')) {
-      if (Math.random() > 0.5) { // 50% chance to remove the ad
-        iframe.remove();
-        console.log('Ad iframe removed successfully.');
-      } else {
-        console.log('Ad iframe left intact.');
-      }
-    }
-  });
-}
 
 // Shorts visibility control
 function handleShorts(visibility) {
-    isShorts = !visibility;
-    hideElements('style-scope ytd-rich-shelf-renderer', true, visibility);
-    hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, visibility);
-    // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility });
-    hideElementById("shorts-container", visibility);
-    hideElements('ytd-reel-shelf-renderer', false, visibility);
-    hideElements('style-scope ytd-page-manager', false, visibility);
-    hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : visibility });
-
-    // mute shorts section 
-    handleURL({
-        fn: () => {
-            document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
-            console.log("Shorts section muted.");
-        }, includesUrl: "https://www.youtube.com/shorts/"
-    });
+    try {
+        isShorts = !visibility;
+        hideElements('style-scope ytd-rich-shelf-renderer', true, visibility);
+        hideElementByShortsClassName("yt-tab-shape-wiz yt-tab-shape-wiz--host-clickable", 2, visibility);
+        // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility });
+        hideElementById("shorts-container", visibility);
+        hideElements('ytd-reel-shelf-renderer', false, visibility);
+        hideElements('style-scope ytd-page-manager', false, visibility);
+        hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : visibility });
+    
+        // mute shorts section 
+        handleURL({
+            fn: () => {
+                document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
+                console.log("Shorts section muted.");
+            }, includesUrl: "https://www.youtube.com/shorts/"
+        });
+    } catch (err) {
+        console.log({ err : "failed to init shorts" });
+    }
     
 }
 
 // Video suggestions visibility control
 function handleVideoSuggestions(visibility) {
-    isSuggestion = !visibility;
-    handleVideoSize(visibility);
-    hideChildElementById('columns', 'secondary', visibility);
+    try {
+        isSuggestion = !visibility;
+        handleVideoSize(visibility);
+        hideChildElementById('columns', 'secondary', visibility);
+    } catch (err) {
+        console.log({ err : "failed to init suggestions"})
+    }
 }
 
 // Filter by keywords control
 function handleFilterByKeywords(item) {
-    if (isFiltered !== item?.action) {
-        isFiltered = item?.action;
-        const url = window.location.href;
-        if (url == "https://www.youtube.com/") {
-            handleFiltered();
+    try {
+        if (isFiltered !== item?.action) {
+            isFiltered = item?.action;
+            const url = window.location.href;
+            if (url == "https://www.youtube.com/") {
+                handleFiltered();
+            }
         }
+    } catch (err) {
+        console.log({err : "failed to init filteration"})
     }
 }
 
 // Picture in Picture mode control
 function handlePiPMode(visibility) {
-    isPip = !visibility;
-    addPiPButtonOnce(visibility);
+    try {
+        isPip = !visibility;
+        addPiPButtonOnce(visibility);
+    } catch (err) {
+        console.log({err : "failed to execute pip mode"})
+    }
 }
 
 // Advanced volume booster control
 function handleVolumeBooster(visibility) {
-    isVolumeBooster = !visibility;
-    if (!audioContext) 
-        initialized = true;
-    const url = window.location.href;
-    if (url.includes("watch?v=")) 
-        VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)
-    else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
-        VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)    
+    try {
+        isVolumeBooster = !visibility;
+        if (!audioContext) 
+            initialized = true;
+        const url = window.location.href;
+        if (url.includes("watch?v=")) 
+            VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)
+        else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
+            VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true)    
+    } catch (err) {
+        console.log({err : 'failed to init volume booster'})
+    }
 }
 
 // Precision audio equalizer control
 function handleEqualizer(visibility) {
-    isEqualizer = !visibility;
-    if (!audioContext) 
-        initialized = true;
-    const url = window.location.href;
-    if (url.includes("watch?v=")) 
-        VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
-    else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
-        VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
+    try {
+        isEqualizer = !visibility;
+        if (!audioContext) 
+            initialized = true;
+        const url = window.location.href;
+        if (url.includes("watch?v=")) 
+            VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
+        else if (url.includes("https://www.mxplayer.in/show/") || url.includes("https://www.mxplayer.in/movie/")) 
+            VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false)
+    } catch (err) {
+        console.log({err : "failed to init equlizer"})
+    }
 }
 
 // Home feed control
 function handleHomeFeed(visibility) {
-    isHome = !visibility;
-    hideSideBarElements({ list: ['.style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home', visibility });
-    replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png', visibility);
+    try {
+        isHome = !visibility;
+        hideSideBarElements({ list: ['.style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'home', visibility });
+        replaceContentWithMessage('.style-scope ytd-rich-grid-renderer', 'Home Section off by My Tube', 'icon16.png', visibility);
+    } catch (err) {
+        console.log({err : "failed to home feed"})
+    }
 }
 
 // History visibility control
 function handleHistory(visibility) {
-    isHistory = !visibility;
-    hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
-    hideElements('style-scope ytd-browse grid grid-5-columns', true, visibility);
+    try {
+        isHistory = !visibility;
+        hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
+        hideElements('style-scope ytd-browse grid grid-5-columns', true, visibility);
+    } catch (err) {
+        console.log({err : "failed to init history"});
+        
+    }
     // hideElements({list : ['style-scope ytd-page-manager'], text : true, visibility})
     // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer'], text: 'history', visibility });
 
@@ -980,10 +822,15 @@ function handleHistory(visibility) {
 // hide comment section 
 
 function hideComments(visibility) {
-    isComments = !visibility;
-    const url = window.location.href;
-    if (url.includes("watch?v=")) 
-        hideElements('style-scope ytd-comments', true, visibility);
+    try {
+        isComments = !visibility;
+        const url = window.location.href;
+        if (url.includes("watch?v=")) 
+            hideElements('style-scope ytd-comments', true, visibility);
+    } catch (err) {
+        console.log({err : "falied to init comments"});
+        
+    }
 }
 
 function isValueChanged({preValue, newValue, funCall, params, visibility = false}) {
@@ -993,44 +840,44 @@ function isValueChanged({preValue, newValue, funCall, params, visibility = false
         return false;
 }
 
-function visibilityOfElement({ visibility = false }) {
-
-}
-
 async function handleUIUpdateOnScreenVisible(data) {
-    if (data) {
-        const setting = JSON.parse(data);
-        const response = await chrome.storage.local.get(['isActive']);
-        const isActive = response?.isActive;
-        setting.map((item) => {
-            const { name } = item;
-            if (isActive) {
-                if (name.toLowerCase() == 'shorts')
-                    isValueChanged({ preValue: isShorts, newValue: item?.action, funCall: handleShorts, visibility: !item?.action });
-                else if (name.toLowerCase() == 'video suggestions')
-                    isValueChanged({ preValue: isSuggestion, newValue: item?.action, funCall: handleVideoSuggestions, visibility: !item?.action });
-                else if (name.toLowerCase() == 'home feed')
-                    isValueChanged({ preValue: isHome, newValue: item?.action, funCall: handleHomeFeed, visibility: !item?.action });
-                else if (name.toLowerCase() == "history")
-                    isValueChanged({ preValue: isHistory, newValue: item?.action, funCall: handleHistory, visibility: !item?.action });
-                else if (name.toLowerCase() == "picture in picture mode")
-                    isValueChanged({ preValue: isPip, newValue: item?.action, funCall: handlePiPMode, visibility: !item?.action });
-                else if (name.toLowerCase() == "filter by keywords")
-                    isValueChanged({ preValue: isFiltered, newValue: item?.action, funCall: handleFilterByKeywords, visibility: !item?.action });
-                else if (name.toLowerCase() == "advanced volume booster")
-                    isValueChanged({ preValue: isVolumeBooster, newValue: item?.action, funCall: handleVolumeBooster, visibility: !item?.action });
-                else if (name.toLowerCase() == "precision audio equalizer")
-                    isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
-                else if (name.toLowerCase() == "comments")
-                    isValueChanged({ preValue: isComments, newValue: item?.action, funCall: hideComments, visibility: !item?.action });
-            } else {
-                console.log("my tube off")
-            }
-        }) 
-
-        setTimeout(() => { 
-            CUSTOM_PARTS_EXECUTION()
-        }, 1000) 
+    try {
+        if (data) {
+            const setting = JSON.parse(data);
+            const response = await chrome.storage.local.get(['isActive']);
+            const isActive = response?.isActive;
+            setting.map((item) => {
+                const { name } = item;
+                if (isActive) {
+                    if (name.toLowerCase() == 'shorts')
+                        isValueChanged({ preValue: isShorts, newValue: item?.action, funCall: handleShorts, visibility: !item?.action });
+                    else if (name.toLowerCase() == 'video suggestions')
+                        isValueChanged({ preValue: isSuggestion, newValue: item?.action, funCall: handleVideoSuggestions, visibility: !item?.action });
+                    else if (name.toLowerCase() == 'home feed')
+                        isValueChanged({ preValue: isHome, newValue: item?.action, funCall: handleHomeFeed, visibility: !item?.action });
+                    else if (name.toLowerCase() == "history")
+                        isValueChanged({ preValue: isHistory, newValue: item?.action, funCall: handleHistory, visibility: !item?.action });
+                    else if (name.toLowerCase() == "picture in picture mode")
+                        isValueChanged({ preValue: isPip, newValue: item?.action, funCall: handlePiPMode, visibility: !item?.action });
+                    else if (name.toLowerCase() == "filter by keywords")
+                        isValueChanged({ preValue: isFiltered, newValue: item?.action, funCall: handleFilterByKeywords, visibility: !item?.action });
+                    else if (name.toLowerCase() == "advanced volume booster")
+                        isValueChanged({ preValue: isVolumeBooster, newValue: item?.action, funCall: handleVolumeBooster, visibility: !item?.action });
+                    else if (name.toLowerCase() == "precision audio equalizer")
+                        isValueChanged({ preValue: isEqualizer, newValue: item?.action, funCall: handleEqualizer, visibility: !item?.action });
+                    else if (name.toLowerCase() == "comments")
+                        isValueChanged({ preValue: isComments, newValue: item?.action, funCall: hideComments, visibility: !item?.action });
+                } else {
+                    console.log("my tube off")
+                }
+            }) 
+    
+            setTimeout(() => { 
+                CUSTOM_PARTS_EXECUTION()
+            }, 1000) 
+        }
+    } catch (err) {
+        console.log({err : "failed to ui update"})
     }
 }
 
@@ -1043,11 +890,16 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 
 async function handleFiltered() {
-    const responseEvent = await chrome.storage.local.get(['keywords']);
-    let events = [];
-    if (responseEvent?.keywords) {
-        events = JSON.parse(responseEvent?.keywords);
-        FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
+    try {
+        const responseEvent = await chrome.storage.local.get(['keywords']);
+        let events = [];
+        if (responseEvent?.keywords) {
+            events = JSON.parse(responseEvent?.keywords);
+            FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
+        }
+    } catch (err) {
+        console.log({err : 'failed to filter'});
+        
     }
     
 }

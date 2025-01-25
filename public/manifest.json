@@ -31,8 +31,7 @@
     {
       "matches": [
         "https://youtube.com/*",
-        "https://*.youtube.com/*",
-        "https://www.mxplayer.in/*"
+        "https://*.youtube.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

@@ -6,6 +6,7 @@ import useHomeHook from "../hooks/useHomeHook";
 const Home = ({setScreen}) => {
    const {setting,isStartOption, isActive, handleExtensionState, handleSettingState, clearSettingState, handleRemoveItem} = useHomeHook();
 
+  
     return (
         <div style={{
             width : '100%',
@@ -47,11 +48,16 @@ const Home = ({setScreen}) => {
         {
           setting?.map((item, index) => {
             return (
-              <SettingItem isExtensionActive={isActive} key={index} item={item} handleSettingChange={handleSettingState} onItemClick={() => {
+              <SettingItem
+                isExtensionActive={isActive}
+                key={index}
+                item={item}
+                handleSettingChange={handleSettingState}
+                onItemClick={() => {
                 console.log({logo : item?.name?.toString()?.toLowerCase() })
                 if (item?.name?.toString()?.toLowerCase() == "clear settings") 
                   clearSettingState();
-                else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) {
+                else if (item?.name?.toString()?.toLowerCase() == "keywords settings" && !setting[index - 1].action) {
                   setScreen("keywords");
                   const filter =  {
                     name : "Filter By Keywords",
@@ -66,11 +72,11 @@ const Home = ({setScreen}) => {
                 else if (item?.name?.toString()?.toLowerCase() == "feedback & support")
                  window?.open(item?.url);
                 
-              }} 
-              isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && setting[index - 1].action) ? true : false}
+                }} 
+              isKeywordsEnable={(item?.name?.toString()?.toLowerCase() == "keywords settings" && !setting[index - 1].action) ? true : false}
               onSwitchOff={handleRemoveItem}
               onSwitchOn={() => {
-               if (item?.name?.toString()?.toLowerCase() == "my tube active")
+                if (item?.name?.toString()?.toLowerCase() == "my tube active")
                   handleRemoveItem();
               }}
               />

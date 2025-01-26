@@ -59,8 +59,6 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
   const hideContentChips = () => {
     const element = document.querySelector('#chips-content');
-    console.log({element})
-
     if (element) {
       element.style.display = "none";
     } else {
@@ -77,7 +75,7 @@ async function FILTER_CONTENT_WITH_KEYWORDS (events, isShorts) {
 
       const ristrict_keyword = events || [];
        if (ristrict_keyword?.length > 0) {
-          hideElementsByTagName(['ytd-rich-shelf-renderer', 'ytd-rich-item-renderer', 'ytd-compact-video-renderer'], ristrict_keyword);
+          hideElementsByTagName(['ytd-rich-shelf-renderer', 'ytd-rich-item-renderer', 'ytd-compact-video-renderer', 'yt-lockup-view-model'], ristrict_keyword);
           hideContentChips(); // hide home screen chips;
         }
     });
@@ -502,6 +500,7 @@ const handleVideoSize = (visibility) => {
     const isFullScreen = document.fullscreenElement;
     const videoContainer = document.querySelector("video");
     let pixel = 0;
+
     if (videoContainer) {
         pixel = videoContainer.style.width;
     }
@@ -594,6 +593,22 @@ const addPiPButtonOnce = (visibility = false) => {
 
 };
 
+const showPlaylist = (visibility = false) => {
+    const relatedVideo = document.querySelector(".style-scope ytd-watch-next-secondary-results-renderer")
+    const adBanner = document.querySelector(".style-scope ytd-companion-slot-renderer")
+    if (!visibility) {
+        relatedVideo.hidden = !visibility;
+        if (adBanner) {
+            adBanner = !visibility;
+        }
+    } else {
+        relatedVideo.hidden = !visibility;
+        if (adBanner) {
+            adBanner = !visibility;
+        }
+    }
+}
+
 function CUSTOM_PARTS_EXECUTION() {
     const throttleTime = 200;
     let lastExecution = 0;
@@ -610,6 +625,7 @@ function CUSTOM_PARTS_EXECUTION() {
                 hideElementById("shorts-container");
                 hideElements('ytd-reel-shelf-renderer', false);
                 hideElements('ytd-shorts', false, false);
+                hideElements('yt-img-shadow', false, false);
                 hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : false });
             } catch (err) { console.log({err : "short"})}
             
@@ -628,12 +644,12 @@ function CUSTOM_PARTS_EXECUTION() {
             } catch (err) { console.log({err : "comments"})}
         }
 
-        if (isSuggestion) {
-            try {
-                handleVideoSize(false);
-                hideChildElementById('columns', 'secondary') 
-            } catch (err) { console.log({err : "suggestions"})}
-        }
+        // if (isSuggestion) {
+        //     try {
+        //         handleVideoSize(false);
+        //         hideChildElementById('columns', 'secondary') 
+        //     } catch (err) { console.log({err : "suggestions"})}
+        // }
           
 
         if (isPip) {
@@ -675,18 +691,83 @@ function CUSTOM_PARTS_EXECUTION() {
         } else if (url.includes("shorts/")) {
             try {
                 if (isShorts) {
+                    window.location.replace("https://www.youtube.com/");
                     document.querySelector(".ytdDesktopShortsVolumeControlsMuteIconButton").click();
                     hideElementRemovedById("shorts-container", visibility);
                 }
             } catch (err) {
                 console.log(err);
             }
+        } 
+
+
+        if (!url.includes("watch?v=")) { 
+            try {
+                document.exitPictureInPicture();
+            } catch (err) {
+
+            }
         }
 
+        // for playlist option
+        if (url.includes("watch?v=") && url.includes("&list=")) { 
+            try {
+                if (isSuggestion) {
+                    handleVideoSize(false)
+                    hideChildElementById('columns', 'secondary', true);
+                    showPlaylist();
+                }
+            } catch (err) { }
+        } else if (url.includes("watch?v=")) {
+            try {
+                if (isSuggestion) {
+                    handleVideoSize(false)
+                    hideChildElementById('columns', 'secondary') 
+                }
+            } catch (err) {}
+        }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
 }
+
+
+// screen time capture 
+
+// let totalTime = 0; // Total time spent in seconds
+// let lastActiveTime = Date.now();
+// let isVideoPlaying = false;
+
+
+// const trackTime = () => {
+//    if (document.visibilityState === "visible") {
+//         const currentTime = Date.now();
+//         const elapsedTime = (currentTime - lastActiveTime) / 1000; // Convert ms to seconds
+//         totalTime += elapsedTime;
+//         lastActiveTime = currentTime;
+//         // Save to localStorage
+//         localStorage.setItem("youtubeScreenTime", totalTime);
+//     }
+// }
+
+// setInterval(() => {
+//     const time = localStorage.getItem("youtubeScreenTime");
+//     console.log({time})
+//     if (parseInt(time) > 20) {
+//         trackTime();
+//     } 
+// }, 1000)
+
+
+// document.addEventListener("visibilitychange", () => {
+//         if (document.visibilityState === "hidden") {
+//             trackTime(); // Save time before the tab becomes inactive
+//         } else if (document.visibilityState === "visible") {
+//             lastActiveTime = Date.now(); // Reset active time
+//         }
+// });
+
+
 
 
 // url specific Operations
@@ -710,7 +791,8 @@ function handleShorts(visibility) {
         hideElementById("shorts-container", visibility);
         hideElements('ytd-reel-shelf-renderer', false, visibility);
         hideElements('style-scope ytd-page-manager', false, visibility);
-        hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility : visibility });
+        hideElements('yt-img-shadow', false, visibility);
+        hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer', 'yt-simple-endpoint style-scope ytd-mini-guide-entry-renderer'], text: 'shorts', visibility: visibility });
     
         // mute shorts section 
         handleURL({
@@ -729,8 +811,15 @@ function handleShorts(visibility) {
 function handleVideoSuggestions(visibility) {
     try {
         isSuggestion = !visibility;
+        const url = window.location.href;
         handleVideoSize(visibility);
-        hideChildElementById('columns', 'secondary', visibility);
+
+        if (url.includes("watch?v=") && url.includes("&list=")) {
+            showPlaylist(visibility)
+        } else if (url.includes("watch?v=") && !url.includes("&list="))
+            hideChildElementById('columns', 'secondary', visibility);
+            
+
     } catch (err) {
         console.log({ err : "failed to init suggestions"})
     }
@@ -742,7 +831,7 @@ function handleFilterByKeywords(item) {
         if (isFiltered !== item?.action) {
             isFiltered = item?.action;
             const url = window.location.href;
-            if (url == "https://www.youtube.com/") {
+            if (url == "https://www.youtube.com/" || url?.includes("/watch?v=")) {
                 handleFiltered();
             }
         }
@@ -756,6 +845,9 @@ function handlePiPMode(visibility) {
     try {
         isPip = !visibility;
         addPiPButtonOnce(visibility);
+        if (visibility) {
+            document.exitPictureInPicture().catch((err) => console.log({err}))
+        }
     } catch (err) {
         console.log({err : "failed to execute pip mode"})
     }

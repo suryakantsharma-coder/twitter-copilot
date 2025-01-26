@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "My Tube",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "My Tube enhances video streaming with advanced controls and personalized features.",
   "icons": {
     "16": "icon16.png",
@@ -24,8 +24,7 @@
   "permissions": ["activeTab","storage","notifications"],
   "host_permissions": [
     "https://youtube.com/*",
-    "https://*.youtube.com/*",
-    "https://www.mxplayer.in/*"
+    "https://*.youtube.com/*"
   ],
   "content_scripts": [
     {

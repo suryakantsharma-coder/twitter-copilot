@@ -23,7 +23,7 @@ const SettingItem = ({
                 color : 'white',
                 display : 'flex',
                 justifyContent :'space-between',
-                opacity : (item?.name?.toString()?.toLowerCase() == "keywords settings" && !isKeywordsEnable) ? 0.2: 1
+                opacity: (item?.name?.toString()?.toLowerCase() == "keywords settings" && !isKeywordsEnable) ? 0.2 : 1
               }}
 
               onClick={()=> {
@@ -80,7 +80,9 @@ const SettingItem = ({
 
               if (item.name.toString().toLowerCase() == "filter by keywords" && !e) {
                 onSwitchOff()
-              } 
+              }  else if (item?.name?.toString()?.toLowerCase() == "shorts" && !e){
+                onSwitchOff()
+              }
             }}
         />
         }

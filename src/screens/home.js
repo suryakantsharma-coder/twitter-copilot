@@ -2,11 +2,18 @@ import Header from "../components/home/header";
 import KeyWords from "../components/home/Keywords";
 import SettingItem from "./setting";
 import useHomeHook from "../hooks/useHomeHook";
+import useAskForReview from "../hooks/useAskForReview";
+import { useEffect } from "react";
 
 const Home = ({setScreen}) => {
    const {setting,isStartOption, isActive, handleExtensionState, handleSettingState, clearSettingState, handleRemoveItem} = useHomeHook();
+   const { checkUserUsage, isReviewed } = useAskForReview();  
 
-  
+  useEffect(() => {
+    if (!isReviewed)
+      setTimeout(() => checkUserUsage(), 1000);      
+  }, [])
+
     return (
         <div style={{
             width : '100%',

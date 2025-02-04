@@ -60,13 +60,13 @@ export const settingOptions = [
           action : false
         },
         {
-          name : "Keywords settings",
+          name : "Keywords Settings",
           description : "Add or remove keywords to customize your feed.",
           type : 'btn',
           action : false
         },
         {
-          name : "Privacy policy",
+          name : "Privacy Policy",
           description : "Read our privacy policy.",
           type : 'btn',
           action : false,
@@ -80,7 +80,7 @@ export const settingOptions = [
           url : "https://t.me/MyTubeFeedbackAndSupport"
         },
         {
-          name : "Clear settings",
+          name : "Clear Settings",
           description : "Undo your changes.",
           type : 'btn',
           action : false

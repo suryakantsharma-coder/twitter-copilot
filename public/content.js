@@ -308,6 +308,14 @@ function createSlider(min, max, step, onInput) {
     return slider;
 }
 
+function checkYouTubeTheme() {
+    const bgColor = getComputedStyle(document.documentElement).backgroundColor;
+    const isDarkMode = bgColor === 'rgb(0, 0, 0)' || bgColor === 'rgb(15, 15, 15)';
+    return isDarkMode ? true : false;
+}
+
+
+
 function createEqualizerControlPanel(controlPanel) {
 
      const frequencyBands = [
@@ -317,7 +325,9 @@ function createEqualizerControlPanel(controlPanel) {
         { freq: 1000, label: "Mid" },
         { freq: 3500, label: "Upper Mid" },
         { freq: 10000, label: "Treble" }
-    ];
+     ];
+    
+    const isDarkMode = checkYouTubeTheme();
 
      const equalizerLabel = document.createElement('label');
         equalizerLabel.innerText = 'Audio Equalizer';
@@ -325,10 +335,12 @@ function createEqualizerControlPanel(controlPanel) {
         equalizerLabel.style.marginTop = '25px';
         equalizerLabel.style.fontSize = "2rem";
         equalizerLabel.style.fontWeight = "700";
-    controlPanel.appendChild(equalizerLabel);
+        equalizerLabel.style.color = isDarkMode ? 'white' : 'black';
+    
+        controlPanel.appendChild(equalizerLabel);
     
 
-     const container = document.createElement('div');
+    const container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'row';
         container.style.alignItems = 'flex-end';
@@ -345,6 +357,8 @@ function createEqualizerControlPanel(controlPanel) {
             const label = document.createElement('label');
             label.innerText = `${band.label} (${band.freq} Hz)`;
             label.style.marginBottom = '5px';
+            label.style.color = isDarkMode ? 'white' : 'black';
+
 
             const slider = document.createElement('input');
             slider.type = 'range';
@@ -371,13 +385,16 @@ function createEqualizerControlPanel(controlPanel) {
     // });
 }
 
+
 function createVolumeControlPanel(controlPanel) {
+    const isDarkMode = checkYouTubeTheme();
     const volumeLabel = document.createElement('label');
     volumeLabel.innerText = 'Volume Booster';
     volumeLabel.style.marginBottom = '10px';
     volumeLabel.style.marginTop = '25px';
     volumeLabel.style.fontSize = "2rem";
     volumeLabel.style.fontWeight = "700";
+    volumeLabel.style.color = isDarkMode ? 'white' : 'black';
 
     // const volumeSlider = createSlider(1, 3, 0.1, (e) => gainNode.gain.value = e.target.value);
     const volumeSlider = document.createElement('input');
@@ -730,45 +747,6 @@ function CUSTOM_PARTS_EXECUTION() {
 
     observer.observe(document.body, { childList: true, subtree: true });
 }
-
-
-// screen time capture 
-
-// let totalTime = 0; // Total time spent in seconds
-// let lastActiveTime = Date.now();
-// let isVideoPlaying = false;
-
-
-// const trackTime = () => {
-//    if (document.visibilityState === "visible") {
-//         const currentTime = Date.now();
-//         const elapsedTime = (currentTime - lastActiveTime) / 1000; // Convert ms to seconds
-//         totalTime += elapsedTime;
-//         lastActiveTime = currentTime;
-//         // Save to localStorage
-//         localStorage.setItem("youtubeScreenTime", totalTime);
-//     }
-// }
-
-// setInterval(() => {
-//     const time = localStorage.getItem("youtubeScreenTime");
-//     console.log({time})
-//     if (parseInt(time) > 20) {
-//         trackTime();
-//     } 
-// }, 1000)
-
-
-// document.addEventListener("visibilitychange", () => {
-//         if (document.visibilityState === "hidden") {
-//             trackTime(); // Save time before the tab becomes inactive
-//         } else if (document.visibilityState === "visible") {
-//             lastActiveTime = Date.now(); // Reset active time
-//         }
-// });
-
-
-
 
 // url specific Operations
 function handleURL({fn, specificUrl = "", includesUrl = ""}) {

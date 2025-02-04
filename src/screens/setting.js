@@ -16,7 +16,7 @@ const SettingItem = ({
   const [isActive, setIsActive] = useState(item.action || false);
 
     return (
-              <div style={{
+              <div className="no-select" style={{
                 width : '100%',
                 textAlign : 'left',
                 padding : 12,
@@ -36,12 +36,12 @@ const SettingItem = ({
                   width : "60%",
                   cursor : "pointer"
                 }}>
-              <h2 style={{
+              <h2 className="no-select" style={{
                 fontSize : 16,
                 margin : 0,
                 padding : 0
               }}>{item.name}</h2>
-              <p style={{
+              <p className="no-select" style={{
                 fontSize : 12,
                 marginTop : 2,
                 padding : 0,

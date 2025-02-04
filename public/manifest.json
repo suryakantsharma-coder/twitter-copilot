@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "My Tube",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "My Tube enhances video streaming with advanced controls and personalized features.",
   "icons": {
     "16": "icon16.png",

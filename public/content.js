@@ -548,6 +548,12 @@ const hideElementRemovedById = (id, visibility = false) => {
             else  if (element && visibility) element.style.display = "flex";
 };
 
+const hideOverflowByClassname = (id, visibility = false) => {
+            const element = document.getElementById(id);
+            if (element && !visibility) element.style.overflow = "auto";
+            else  if (element && visibility) element.style.overflow = "hidden";
+};
+
 const hideChildElementById = (rootId, childId, visibility = false) => {
             const rootElement = document.getElementById(rootId);
             if (rootElement) {
@@ -733,6 +739,7 @@ function CUSTOM_PARTS_EXECUTION() {
                     handleVideoSize(false)
                     hideChildElementById('columns', 'secondary', true);
                     showPlaylist();
+                    hideOverflowByClassname('columns', true);
                 }
             } catch (err) { }
         } else if (url.includes("watch?v=")) {
@@ -740,6 +747,7 @@ function CUSTOM_PARTS_EXECUTION() {
                 if (isSuggestion) {
                     handleVideoSize(false)
                     hideChildElementById('columns', 'secondary') 
+                    hideOverflowByClassname('columns', true);
                 }
             } catch (err) {}
         }
@@ -796,6 +804,12 @@ function handleVideoSuggestions(visibility) {
             showPlaylist(visibility)
         } else if (url.includes("watch?v=") && !url.includes("&list="))
             hideChildElementById('columns', 'secondary', visibility);
+        
+        if (visibility) {
+            hideOverflowByClassname('columns', true);
+        } else {
+            hideOverflowByClassname('columns', false);
+        }
             
 
     } catch (err) {

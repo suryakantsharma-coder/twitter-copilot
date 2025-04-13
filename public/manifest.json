@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "My Tube",
-  "version": "1.0.3",
-  "description": "My Tube enhances video streaming with advanced controls and personalized features.",
+  "name": "My Tube – YouTube, Without the Distractions.",
+  "version": "1.0.4",
+  "description": "A Smarter Way to Watch YouTube.",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",

@@ -154,53 +154,43 @@ function SlowMotionPlayback({ setScreen }) {
               alignItems: 'center',
             }}
           >
-            <select
+            <div
               style={{
-                width: '45%',
-                height: 20,
-                borderRadius: 10,
-                textAlign: 'center',
-                borderRadius: 5,
-                border: 'none',
-                outline: 'none',
-              }}
-              value={options?.shortcutKey}
-              onChange={(e) => {
-                setOptions({ ...options, shortcutKey: e.target.value });
-                setLocalOptions({ ...options, shortcutKey: e.target.value });
+                width: '60%',
               }}
             >
-              {[
-                'A',
-                'B',
-                'C',
-                'D',
-                'E',
-                'F',
-                'G',
-                'H',
-                'I',
-                'J',
-                'K',
-                'L',
-                'M',
-                'N',
-                'O',
-                'P',
-                'Q',
-                'R',
-                'S',
-                'T',
-                'U',
-                'V',
-                'W',
-                'X',
-                'Y',
-                'Z',
-              ].map((item, index) => (
-                <option key={index}>{item}</option>
-              ))}
-            </select>
+              <p
+                style={{
+                  fontSize: 14,
+                  margin: 0,
+                  padding: 0,
+                  color: 'white',
+                }}
+              >
+                Shift +
+              </p>
+              <br />
+              <select
+                style={{
+                  width: '85%',
+                  height: 20,
+                  borderRadius: 10,
+                  textAlign: 'center',
+                  borderRadius: 5,
+                  border: 'none',
+                  outline: 'none',
+                }}
+                value={options?.shortcutKey}
+                onChange={(e) => {
+                  setOptions({ ...options, shortcutKey: e.target.value });
+                  setLocalOptions({ ...options, shortcutKey: e.target.value });
+                }}
+              >
+                {['W', 'A', 'S', 'D'].map((item, index) => (
+                  <option key={index}>{item}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>

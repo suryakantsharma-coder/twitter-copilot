@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Switch from 'react-switch';
+import usePostHog from '../hooks/usePostHog';
 
 const SettingItem = ({
   item,
@@ -13,6 +14,7 @@ const SettingItem = ({
   onSwitchOn = () => {},
 }) => {
   const [isActive, setIsActive] = useState(item.action || false);
+  const { trackEvent } = usePostHog();
 
   return (
     <div
@@ -73,6 +75,11 @@ const SettingItem = ({
             onChange={(e) => {
               setIsActive(e);
               onStateChange(e);
+
+              if (e) {
+                const enventName = `enable ${item.name.toString().toUpperCase().replace(' ', '_')}`;
+                trackEvent(enventName, { value: item.name.toString().toLowerCase() });
+              }
 
               if (isExtensionActive) {
                 handleSettingChange(item, e);

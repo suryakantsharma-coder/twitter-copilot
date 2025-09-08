@@ -1178,6 +1178,8 @@ function handleAutoFocusOnVideo() {
   resetTimer();
 }
 
+// Filter search bar
+
 (function () {
   function filterData(keyword) {
     const playlistItems = document.querySelectorAll('ytd-playlist-panel-video-renderer');
@@ -1194,7 +1196,9 @@ function handleAutoFocusOnVideo() {
   }
 
   function toEnterTextFeild() {
-    const targetContainer = document.querySelectorAll('#header-contents')[1];
+    const targetContainer = document.querySelectorAll(
+      '.style-scope .ytd-playlist-panel-renderer',
+    )[1];
     if (!targetContainer) return;
     const wrapper = document.createElement('ytd-menu-renderer');
     wrapper.style.marginTop = '10px';
@@ -1239,7 +1243,7 @@ function handleAutoFocusOnVideo() {
   setTimeout(() => {
     toEnterTextFeild();
     // filterData('kem');
-  }, 2000);
+  }, 4000);
 })();
 
 const backgroundColor = {
@@ -1360,13 +1364,13 @@ function handleSlowMotionPlayback(newValue) {
   const normalSpeed = 1.0;
 
   function handleKeyDown(event) {
-    if (event.key.toLowerCase() === options.shortcutKey.toLowerCase() || 'Shift') {
+    if (event.key == options.shortcutKey) {
       video.playbackRate = slowSpeed;
     }
   }
 
   function handleKeyUp(event) {
-    if (event.key.toLowerCase() === options.shortcutKey?.toLowerCase() || 'Shift') {
+    if (event.key == options.shortcutKey) {
       video.playbackRate = normalSpeed;
     }
   }
@@ -1429,9 +1433,421 @@ chrome.storage.local.get(['askForReview'], function (result) {
   }
 });
 
+(function () {
+  let cropBox = null;
+
+  function initCropOverlay() {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.zIndex = '999999';
+    overlay.style.cursor = 'crosshair';
+    overlay.style.background = 'rgba(0,0,0,0.1)';
+    document.body.appendChild(overlay);
+
+    cropBox = document.createElement('div');
+    cropBox.style.position = 'fixed';
+    cropBox.style.border = '2px dashed red';
+    cropBox.style.zIndex = '9999999';
+    document.body.appendChild(cropBox);
+
+    let startX, startY;
+
+    overlay.addEventListener('mousedown', (e) => {
+      startX = e.clientX;
+      startY = e.clientY;
+
+      const onMouseMove = (moveEvent) => {
+        const currentX = moveEvent.clientX;
+        const currentY = moveEvent.clientY;
+
+        cropBox.style.left = Math.min(startX, currentX) + 'px';
+        cropBox.style.top = Math.min(startY, currentY) + 'px';
+        cropBox.style.width = Math.abs(currentX - startX) + 'px';
+        cropBox.style.height = Math.abs(currentY - startY) + 'px';
+      };
+
+      const onMouseUp = () => {
+        overlay.remove();
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        captureVideoCrop(cropBox.getBoundingClientRect());
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  function captureVideoCrop(cropRect) {
+    const video = document.querySelector('video');
+    if (!video) {
+      alert('No video found');
+      return;
+    }
+
+    const videoRect = video.getBoundingClientRect();
+
+    const scaleX = video.videoWidth / videoRect.width;
+    const scaleY = video.videoHeight / videoRect.height;
+
+    const sx = (cropRect.left - videoRect.left) * scaleX;
+    const sy = (cropRect.top - videoRect.top) * scaleY;
+    const sw = cropRect.width * scaleX;
+    const sh = cropRect.height * scaleY;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = sw;
+    canvas.height = sh;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+
+    const dataUrl = canvas.toDataURL('image/png');
+    fetch(dataUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        navigator.clipboard
+          .write([new ClipboardItem({ 'image/png': blob })])
+          .then(() => {
+            // window.open('https://images.google.com', '_blank');
+            alert(
+              '✅ Image copied to clipboard.\n➡️ In the new tab, click the Lens icon and press Ctrl+V to paste.',
+            );
+          })
+          .catch((err) => {
+            alert('❌ Clipboard write failed: ' + err.message);
+          });
+      });
+
+    //   const newTab = window.open();
+    //   newTab.document.write(`
+    //   <html><head><title>Google Lens Upload</title></head>
+    //   <body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    //     <h2>Right-click the image → "Search image with Google Lens"</h2>
+    //     <img src="${dataUrl}" style="max-width:90%;max-height:90vh;border:1px solid #ccc;"/>
+    //   </body></html>
+    // `);
+
+    // canvas.toBlob((blob) => {
+    //   const a = document.createElement('a');
+    //   a.href = URL.createObjectURL(blob);
+    //   a.download = 'cropped-video-frame.png';
+    //   a.click();
+    // });
+
+    // canvas.toBlob((blob) => {
+    //   const form = document.createElement('form');
+    //   form.method = 'POST';
+    //   form.enctype = 'multipart/form-data';
+    //   form.action = 'https://www.google.com/searchbyimage/upload';
+    //   form.target = '_blank';
+
+    //   const input = document.createElement('input');
+    //   input.type = 'hidden';
+    //   input.name = 'encoded_image';
+    //   const reader = new FileReader();
+    //   reader.onload = () => {
+    //     input.value = reader.result.split(',')[1];
+    //     form.appendChild(input);
+
+    //     const cb = document.createElement('input');
+    //     cb.type = 'hidden';
+    //     cb.name = 'image_content';
+    //     cb.value = '';
+    //     form.appendChild(cb);
+
+    //     const sb = document.createElement('input');
+    //     sb.type = 'hidden';
+    //     sb.name = 'filename';
+    //     sb.value = 'screenshot.png';
+    //     form.appendChild(sb);
+
+    //     document.body.appendChild(form);
+    //     form.submit();
+    //     form.remove();
+    //   };
+    //   reader.readAsDataURL(blob);
+    // });
+
+    cropBox.remove();
+  }
+
+  // Keyboard shortcut: Shift + V
+  document.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.code === 'KeyV') {
+      initCropOverlay();
+    }
+  });
+})();
+
 // keywords
 // youtube enhancer
 // youtube premium
 // youtube audio
 // youtube blocker
 // youtube ad blocker
+
+// watch later video next level added
+
+function injectButton() {
+  let actionsBar = document.querySelector('#above-the-fold #middle-row');
+  const short = document.querySelector('#metapanel');
+  if (!actionsBar || document.querySelector('#mytube-context-btn')) return;
+
+  if (short) {
+    short.style.gap = '10px';
+    actionsBar = short;
+  }
+
+  const btn = document.createElement('button');
+  btn.id = 'mytube-context-btn';
+  btn.innerText = '⏱ Watch Later';
+  btn.style.marginLeft = short ? '0px' : '10px';
+  btn.style.padding = '6px 12px';
+  btn.style.cursor = 'pointer';
+  btn.style.borderRadius = '6px';
+  btn.style.background = '#ff4d4d';
+  btn.style.color = '#fff';
+  btn.style.border = 'none';
+  btn.style.height = '32px';
+  btn.style.borderRadius = '200px';
+  btn.style.display = 'flex';
+  btn.style.justifyContent = 'center';
+  btn.style.alignItems = 'center';
+  btn.style.marginTop = short ? '10px' : '0px';
+
+  btn.onclick = showPopup;
+  actionsBar.appendChild(btn);
+}
+
+function showPopup() {
+  const videoId = new URLSearchParams(window.location.search).get('v');
+  const videoTitle = document.title.replace(' - YouTube', '');
+  const video = document.querySelector('video');
+  const timestamp = video ? formatTime(video.currentTime) : '0:00';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'mytube-popup';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '50%';
+  overlay.style.left = '50%';
+  overlay.style.transform = 'translate(-50%, -50%)';
+  overlay.style.zIndex = '99999';
+  overlay.style.background = '#141414';
+  overlay.style.padding = '20px';
+  overlay.style.borderRadius = '12px';
+  overlay.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+  overlay.style.color = '#fff';
+  overlay.innerHTML = `
+    <h3 style="margin:0 0 10px 0; font-size:20px;">Save Video Context</h3>
+    <p style="margin:0 0 10px 0; font-size:16px;"><b>${videoTitle}</b></p>
+    <p  style="margin:0 0 10px 0; font-size:13px;">Timestamp: ${timestamp}</p>
+    <label style="margin:0 0 10px 0; font-size:13px;">Tags (comma separated):</label>
+    <input id="mytube-tags" type="text" style="width:100%;margin-bottom:10px;margin-top: 10px;height: 26px;border-radius: 5px;border: none;" />
+    <label style="margin:0 0 10px 0; font-size:13px;">Notes:</label>
+    <textarea id="mytube-note" style="width:100%;height:60px;margin-bottom:10px;"></textarea>
+    <div style="text-align:right;">
+      <button id="mytube-cancel" style="
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid #FFF;
+    background: transparent;
+    color: #FFF;
+    width: 70px;
+      ">Cancel</button>
+      <button id="mytube-save" style="padding: 8px;margin-left:10px;background:#28a745; 8px;border-radius: 50px;border: none;cursor: pointer;color: #FFF;width: 70px;">Save</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('mytube-cancel').onclick = () => overlay.remove();
+  document.getElementById('mytube-save').onclick = () => {
+    const tags = document
+      .getElementById('mytube-tags')
+      .value.split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const note = document.getElementById('mytube-note').value;
+
+    saveToLocalStorage({
+      videoId,
+      title: videoTitle,
+      timestamp,
+      tags,
+      note,
+      url: window.location.href,
+      createdAt: new Date().toISOString(),
+    });
+
+    overlay.remove();
+    alert('✅ Saved to Watch Later+');
+  };
+}
+
+function saveToLocalStorage(data) {
+  chrome.storage.local.get(['mytube-watchlater'], function (result) {
+    let saved = result['mytube-watchlater'] || [];
+    saved.push(data);
+    // localStorage.setItem('mytube-watchlater', JSON.stringify(saved));
+    chrome.storage.local.set({ 'mytube-watchlater': saved }, function () {
+      console.log('Saved to chrome.storage.local');
+    });
+  });
+}
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return (h > 0 ? h + ':' : '') + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+// Run on page load & when navigation happens
+setInterval(injectButton, 6000);
+
+function initMyTubeSearch() {
+  const input = document.querySelector('input');
+  if (!input) {
+    // console.log('❌ MyTube: Search input not found');
+    return;
+  }
+
+  if (input.dataset.mytubeAttached) return; // avoid double listeners
+  input.dataset.mytubeAttached = 'true';
+
+  // console.log('✅ MyTube: Search input found, attaching listener');
+
+  input.addEventListener('input', () => {
+    const query = input.value.toLowerCase().trim();
+    // console.log('🔍 MyTube: User typed query =', query);
+
+    if (!query) {
+      // console.log('ℹ️ MyTube: Empty query, removing suggestions');
+      removeMyTubeSuggestions();
+      return;
+    }
+
+    // const saved = JSON.parse(localStorage.getItem('mytube-watchlater')) || [];
+    chrome.storage.local.get('mytube-watchlater', function (result) {
+      console.log('Loaded:', result['mytube-watchlater']);
+      const saved = result['mytube-watchlater'];
+      const matches = saved.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query) ||
+          item.tags.some((tag) => tag.toLowerCase().includes(query)) ||
+          (item.note && item.note.toLowerCase().includes(query)),
+      );
+
+      // console.log('✅ MyTube: Matches found =', matches);
+      injectMyTubeSuggestions(matches);
+    });
+    // console.log('📂 MyTube: Saved items =', saved);
+  });
+}
+
+function timeToSeconds(timestamp) {
+  const parts = timestamp.split(':').map(Number).reverse(); // ["45","13","00"] → [45,13,0]
+  let seconds = 0;
+  if (parts[0]) seconds += parts[0]; // seconds
+  if (parts[1]) seconds += parts[1] * 60; // minutes
+  if (parts[2]) seconds += parts[2] * 3600; // hours
+  return seconds;
+}
+
+function injectMyTubeSuggestions(matches) {
+  removeMyTubeSuggestions();
+
+  const container = document.querySelector('.ytSearchboxComponentSuggestionsContainer');
+  if (!container) {
+    // console.log('❌ MyTube: Suggestion container not found');
+    return;
+  }
+
+  if (matches.length === 0) {
+    // console.log('ℹ️ MyTube: No matches to inject');
+    return;
+  }
+
+  // console.log('✅ MyTube: Injecting', matches.length, 'suggestions');
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'mytube-suggestions';
+  wrapper.style.borderBottom = '0px solid #333';
+  wrapper.style.padding = '8px 0';
+
+  const header = document.createElement('div');
+  header.innerText = '📌 Saved from MyTube';
+  header.style.fontSize = '12px';
+  header.style.color = '#aaa';
+  header.style.margin = '0 12px 6px';
+  wrapper.appendChild(header);
+
+  matches.slice(0, 4).forEach((m) => {
+    const item = document.createElement('div');
+    item.className = 'mytube-suggestion-item';
+    item.style.padding = '6px 12px';
+    item.style.cursor = 'pointer';
+    item.style.color = '#fff';
+    item.style.display = 'flex';
+    item.style.flexDirection = 'column';
+
+    item.innerHTML = `
+      <span style="font-size:14px;">${m.title}</span>
+      <span style="font-size:12px;color:#aaa;">${m.note || ''} ${
+        m.timestamp ? '@' + m.timestamp : ''
+      }</span>
+    `;
+
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      let url = new URL(m.url);
+
+      if (m.timestamp && m.url.toString().includes('watch?v=')) {
+        const seconds = timeToSeconds(m.timestamp);
+        url.searchParams.set('t', seconds + 's');
+        window.location.href = m.url + '&t=' + seconds + 's';
+      } else {
+        window.location.href = m.url;
+      }
+    });
+
+    wrapper.appendChild(item);
+  });
+  if (matches.length > 4) {
+    const seeMore = document.createElement('div');
+    seeMore.innerText = 'See more';
+    seeMore.style.cursor = 'pointer';
+    seeMore.style.textAlign = 'right';
+    seeMore.style.fontSize = '12px';
+    seeMore.style.color = '#aaa';
+    seeMore.style.margin = '0 12px 6px';
+    wrapper.appendChild(seeMore);
+
+    seeMore.addEventListener('mousedown', () => {
+      console.log('🔎 MyTube: See more clicked');
+      chrome.runtime.sendMessage({ action: 'openPopup', option: 'watchlater' });
+      chrome.storage.local.set({ path: 'watch-later' });
+    });
+  }
+
+  container.prepend(wrapper);
+  // add see more optionwjen the match more then 4 suggestions als open the extension
+}
+
+function removeMyTubeSuggestions() {
+  const old = document.getElementById('mytube-suggestions');
+  if (old) {
+    console.log('🗑️ MyTube: Removing old suggestions');
+    old.remove();
+  }
+}
+
+// Re-run every 2s in case YouTube re-renders search box
+setTimeout(initMyTubeSearch, 2000);

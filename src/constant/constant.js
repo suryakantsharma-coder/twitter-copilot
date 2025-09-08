@@ -89,6 +89,12 @@ export const settingOptions = [
     action: false,
   },
   {
+    name: 'Watch Later',
+    description: 'Save videos you want to watch later.',
+    type: 'btn',
+    action: false,
+  },
+  {
     name: 'Privacy Policy',
     description: 'Read our privacy policy.',
     type: 'btn',

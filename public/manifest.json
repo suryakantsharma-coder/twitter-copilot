@@ -21,12 +21,12 @@
     "service_worker": "background.js"
   },
 
-  "permissions": ["activeTab", "storage", "notifications"],
+  "permissions": ["activeTab", "storage", "notifications", "tabs"],
   "host_permissions": ["https://youtube.com/*", "https://*.youtube.com/*"],
   "content_scripts": [
     {
       "matches": ["https://youtube.com/*", "https://*.youtube.com/*"],
-      "js": ["content.js"],
+      "js": ["libs/html2canvas.min.js", "content.js"],
       "run_at": "document_idle"
     }
   ]

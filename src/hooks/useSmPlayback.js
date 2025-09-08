@@ -7,7 +7,7 @@ const test = false;
 const useSlowMotionPlaybackHook = () => {
   const [options, setOptions] = useState({
     playbackSpeed: 0.75,
-    shortcutKey: 's',
+    shortcutKey: 'S',
   });
 
   function getLocalOptions() {
@@ -24,8 +24,8 @@ const useSlowMotionPlaybackHook = () => {
               setOptions(state);
             } else {
               setLocalOptions({
-                playbackSpeed: 0.5,
-                shortcutKey: 's',
+                playbackSpeed: 0.75,
+                shortcutKey: 'S',
               });
             }
           });

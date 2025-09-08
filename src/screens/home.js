@@ -4,6 +4,7 @@ import SettingItem from './setting';
 import useHomeHook from '../hooks/useHomeHook';
 import useAskForReview from '../hooks/useAskForReview';
 import { useEffect } from 'react';
+import useSlowMotionPlaybackHook from '../hooks/useSmPlayback';
 
 const Home = ({ setScreen }) => {
   const {
@@ -16,6 +17,7 @@ const Home = ({ setScreen }) => {
     handleRemoveItem,
   } = useHomeHook();
   const { checkUserUsage, isReviewed } = useAskForReview();
+  useSlowMotionPlaybackHook();
 
   useEffect(() => {
     if (!isReviewed) setTimeout(() => checkUserUsage(), 1000);
@@ -92,6 +94,8 @@ const Home = ({ setScreen }) => {
                     action: false,
                   };
                   handleSettingState(filter, false);
+                } else if (item?.name?.toString()?.toLowerCase() == 'watch later') {
+                  setScreen('watch-later');
                 } else if (item?.name?.toString()?.toLowerCase() == 'privacy policy')
                   window?.open(item?.url);
                 else if (item?.name?.toString()?.toLowerCase() == 'feedback & support')

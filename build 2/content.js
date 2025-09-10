@@ -31,7 +31,6 @@ function REMOVE_SCRIPT() {
     injectedScript.remove();
   }
 
-  console.log('Script removed!');
   window.location.reload();
 }
 
@@ -258,7 +257,6 @@ function disconnectAudioContext() {
   gainNode.disconnect();
   audioContext.close(); // Close the audio context
   initialized = false;
-  console.log('Audio context disconnected and resources released.');
 }
 
 function createEqualizerNodes() {
@@ -610,7 +608,7 @@ function CUSTOM_PARTS_EXECUTION() {
           visibility: false,
         });
       } catch (err) {
-        console.log({ err: 'short' });
+        console.error({ err: 'short' });
       }
     }
 
@@ -622,7 +620,7 @@ function CUSTOM_PARTS_EXECUTION() {
           'icon16.png',
         );
       } catch (err) {
-        console.log({ err: 'home feed' });
+        console.error({ err: 'home feed' });
       }
     }
 
@@ -630,22 +628,15 @@ function CUSTOM_PARTS_EXECUTION() {
       try {
         hideElements('style-scope ytd-comments', true, false);
       } catch (err) {
-        console.log({ err: 'comments' });
+        // console.error({ err: 'comments' });
       }
     }
-
-    // if (isSuggestion) {
-    //     try {
-    //         handleVideoSize(false);
-    //         hideChildElementById('columns', 'secondary')
-    //     } catch (err) { console.log({err : "suggestions"})}
-    // }
 
     if (isPip) {
       try {
         addPiPButtonOnce();
       } catch (err) {
-        console.log('pip');
+        console.error(err);
       }
     }
 
@@ -660,7 +651,7 @@ function CUSTOM_PARTS_EXECUTION() {
           VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, isEqualizer, false, false);
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     } else if (url.includes('feed/history')) {
       try {
@@ -672,7 +663,7 @@ function CUSTOM_PARTS_EXECUTION() {
           hideElements('style-scope ytd-browse grid grid-5-columns', true, true);
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     } else if (url.includes('shorts/')) {
       try {
@@ -682,7 +673,7 @@ function CUSTOM_PARTS_EXECUTION() {
           hideElementRemovedById('shorts-container', visibility);
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
 
@@ -752,12 +743,11 @@ function handleShorts(visibility) {
     handleURL({
       fn: () => {
         document.querySelector('.ytdDesktopShortsVolumeControlsMuteIconButton').click();
-        console.log('Shorts section muted.');
       },
       includesUrl: 'https://www.youtube.com/shorts/',
     });
   } catch (err) {
-    console.log({ err: 'failed to init shorts' });
+    console.error({ err: 'failed to init shorts' });
   }
 }
 
@@ -773,7 +763,7 @@ function handleVideoSuggestions(visibility) {
     } else if (url.includes('watch?v=') && !url.includes('&list='))
       hideChildElementById('columns', 'secondary', visibility);
   } catch (err) {
-    console.log({ err: 'failed to init suggestions' });
+    console.error({ err: 'failed to init suggestions' });
   }
 }
 
@@ -788,7 +778,7 @@ function handleFilterByKeywords(item) {
       }
     }
   } catch (err) {
-    console.log({ err: 'failed to init filteration' });
+    console.error({ err: 'failed to init filteration' });
   }
 }
 
@@ -798,10 +788,10 @@ function handlePiPMode(visibility) {
     isPip = !visibility;
     addPiPButtonOnce(visibility);
     if (visibility) {
-      document.exitPictureInPicture().catch((err) => console.log({ err }));
+      document.exitPictureInPicture().catch((err) => console.error({ err }));
     }
   } catch (err) {
-    console.log({ err: 'failed to execute pip mode' });
+    console.error({ err: 'failed to execute pip mode' });
   }
 }
 
@@ -818,7 +808,7 @@ function handleVolumeBooster(visibility) {
     )
       VOLUME_EQUALIZER_AND_BOOSTER(true, isEqualizer, visibility, true);
   } catch (err) {
-    console.log({ err: 'failed to init volume booster' });
+    console.error({ err: 'failed to init volume booster' });
   }
 }
 
@@ -836,7 +826,7 @@ function handleEqualizer(visibility) {
     )
       VOLUME_EQUALIZER_AND_BOOSTER(isVolumeBooster, true, visibility, false);
   } catch (err) {
-    console.log({ err: 'failed to init equlizer' });
+    console.error({ err: 'failed to init equlizer' });
   }
 }
 
@@ -859,7 +849,7 @@ function handleHomeFeed(visibility) {
       visibility,
     );
   } catch (err) {
-    console.log({ err: 'failed to home feed' });
+    console.error({ err: 'failed to home feed' });
   }
 }
 
@@ -870,7 +860,7 @@ function handleHistory(visibility) {
     hideElements('style-scope ytd-browse grid grid-6-columns', true, visibility);
     hideElements('style-scope ytd-browse grid grid-5-columns', true, visibility);
   } catch (err) {
-    console.log({ err: 'failed to init history' });
+    console.error({ err: 'failed to init history' });
   }
   // hideElements({list : ['style-scope ytd-page-manager'], text : true, visibility})
   // hideSideBarElements({ list: ['style-scope ytd-guide-entry-renderer'], text: 'history', visibility });
@@ -884,7 +874,7 @@ function hideComments(visibility) {
     const url = window.location.href;
     if (url.includes('watch?v=')) hideElements('style-scope ytd-comments', true, visibility);
   } catch (err) {
-    console.log({ err: 'falied to init comments' });
+    console.error({ err: 'falied to init comments' });
   }
 }
 
@@ -966,7 +956,7 @@ async function handleUIUpdateOnScreenVisible(data) {
               visibility: !item?.action,
             });
         } else {
-          console.log('my tube off');
+          // console.error('my tube off');
         }
       });
 
@@ -975,12 +965,11 @@ async function handleUIUpdateOnScreenVisible(data) {
       }, 1000);
     }
   } catch (err) {
-    console.log({ err: 'failed to ui update' });
+    console.error({ err: 'failed to ui update' });
   }
 }
 
 chrome.storage.onChanged.addListener(function (changes, namespace) {
-  console.log('Changes', changes);
   if (changes?.setting?.newValue) {
     handleUIUpdateOnScreenVisible(changes?.setting?.newValue);
   }
@@ -995,13 +984,12 @@ async function handleFiltered() {
       FILTER_CONTENT_WITH_KEYWORDS(events, isShorts);
     }
   } catch (err) {
-    console.log({ err: 'failed to filter' });
+    console.error({ err: 'failed to filter' });
   }
 }
 
 chrome.storage.local.get(['setting'], function (result) {
   if (result?.setting) {
-    console.log({ result: JSON.parse(result?.setting) });
     handleUIUpdateOnScreenVisible(result?.setting);
   }
 });

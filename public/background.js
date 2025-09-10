@@ -9,12 +9,12 @@ const updateUserAboutFeaturesByNotification = (notificationId) => {
       priority: 2,
     },
     (notificationId) => {
-      console.log('Notification created with ID:', notificationId);
+      // console.log('Notification created with ID:', notificationId);
     },
   );
 
   chrome.notifications.onClicked.addListener((notificationId) => {
-    console.log('Notification clicked:', notificationId);
+    // console.log('Notification clicked:', notificationId);
     chrome.tabs.create({
       url: 'https://medium.com/@suryakantsharma.me/my-tube-extension-f3dcf8a9a70b',
     });
@@ -52,9 +52,7 @@ function checkFeedbackReminder() {
   chrome.storage.local.get(['lastFeedback'], (result) => {
     const now = Date.now();
     const last = result.lastFeedback || 0;
-    // const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-    //  for test make it 20 s
-    const thirtyDays = 10 * 60 * 60 * 1000;
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
 
     if (now - last > thirtyDays) {
       chrome.storage.local.set({ path: 'feedback-form' });

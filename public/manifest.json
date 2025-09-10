@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "My Tube – YouTube Enhancer with Audio Control & Distraction Filters",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A Smarter Way to Watch YouTube.",
   "icons": {
     "16": "icon16.png",
@@ -21,7 +21,7 @@
     "service_worker": "background.js"
   },
 
-  "permissions": ["activeTab", "storage", "notifications", "tabs"],
+  "permissions": ["activeTab", "storage", "notifications"],
   "host_permissions": ["https://youtube.com/*", "https://*.youtube.com/*"],
   "content_scripts": [
     {

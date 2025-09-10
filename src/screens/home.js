@@ -79,7 +79,6 @@ const Home = ({ setScreen }) => {
               item={item}
               handleSettingChange={handleSettingState}
               onItemClick={() => {
-                console.log({ logo: item?.name?.toString()?.toLowerCase() });
                 if (item?.name?.toString()?.toLowerCase() == 'clear settings') clearSettingState();
                 else if (
                   item?.name?.toString()?.toLowerCase() == 'keywords settings' &&

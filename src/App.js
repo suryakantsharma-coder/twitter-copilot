@@ -14,7 +14,6 @@ function App() {
 
   useEffect(() => {
     chrome.storage.local.get('path', function (result) {
-      console.log({ result });
       if (result?.path) {
         setScreen(result?.path);
         chrome.storage.local.remove('path');

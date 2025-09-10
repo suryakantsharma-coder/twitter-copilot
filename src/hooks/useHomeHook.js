@@ -12,7 +12,7 @@ const useHomeHook = () => {
   const handleState = (isActive) => {
     if (isExtension) {
       chrome.storage.local.set({ isActive: isActive }, function () {
-        console.log('Value is set.');
+        // console.log('Value is set.');
       });
     } else {
       localStorage.setItem('isActive', isActive);
@@ -36,7 +36,7 @@ const useHomeHook = () => {
 
       if (isExtension) {
         chrome.storage.local.set({ setting: JSON.stringify(data) }, function () {
-          console.log('Setting Saved');
+          // console.log('Setting Saved');
         });
       } else {
         localStorage.setItem('setting', JSON.stringify(data));
@@ -44,7 +44,7 @@ const useHomeHook = () => {
       getSettingState();
     } catch (err) {
       alert('Failed to save.');
-      console.log('Failed to save setting');
+      console.error('Failed to save setting');
     }
   };
 
@@ -52,11 +52,11 @@ const useHomeHook = () => {
     try {
       if (isExtension) {
         chrome.storage.local.remove(['setting'], function () {
-          console.log('Setting cleared');
+          // console.log('Setting cleared');
         });
 
         chrome.storage.local.remove(['keywords'], function () {
-          console.log('keywords cleared');
+          // console.log('keywords cleared');
         });
       } else {
         localStorage.removeItem('setting');
@@ -65,7 +65,7 @@ const useHomeHook = () => {
       window.close();
     } catch (err) {
       alert('Failed to remove setting');
-      console.log('Failed to save setting');
+      console.error('Failed to save setting');
     }
   };
 
@@ -73,7 +73,7 @@ const useHomeHook = () => {
     try {
       if (isExtension) {
         chrome.storage.local.get(['isActive'], function (result) {
-          console.log({ isActive: result?.isActive });
+          console.error({ isActive: result?.isActive });
           setIsActive(result?.isActive);
         });
       } else {
@@ -89,7 +89,6 @@ const useHomeHook = () => {
     try {
       if (isExtension) {
         const result = await chrome.storage.local.get(['setting']);
-        console.log('Value currently is ' + result.setting, JSON.parse(result?.setting));
         const settings = JSON.parse(result?.setting);
         if (settings?.length == settingOptions?.length) {
           setSetting(settings);
@@ -98,12 +97,12 @@ const useHomeHook = () => {
         }
       } else {
         const setting = localStorage.getItem('setting');
-        console.log({ setting: JSON.parse(setting) });
+        // console.log({ setting: JSON.parse(setting) });
         if (setting) setSetting(JSON.parse(setting));
         else setSetting(settingOptions);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setSetting(settingOptions);
     }
   };
@@ -112,7 +111,7 @@ const useHomeHook = () => {
     try {
       if (isExtension) {
         const result = await chrome.storage.local.get(['isActive']);
-        console.log('Value currently is ' + result.isActive);
+        console.error('Value currently is ' + result.isActive);
         const item = startOption?.map((item) => {
           return {
             name: item?.name,
@@ -124,7 +123,6 @@ const useHomeHook = () => {
         setStartOption([item]);
       } else {
         const result = localStorage.getItem('isActive');
-        console.log({ setting: result });
         if (setting) {
           const item = startOption?.map((item) => {
             return {
@@ -138,7 +136,7 @@ const useHomeHook = () => {
         } else setStartOption(startOption);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setStartOption(startOption);
     }
   };
@@ -148,7 +146,7 @@ const useHomeHook = () => {
       chrome.tabs.sendMessage(tabs[0].id, { action: events }, (response) => {
         if (response?.success) {
           // alert("Ads blocked successfully!");
-          console.log('removed');
+          // console.log('removed');
         } else {
           // alert("Failed to block ads. Make sure the content script is loaded.");
         }
@@ -161,7 +159,7 @@ const useHomeHook = () => {
       chrome.tabs.sendMessage(tabs[0].id, { action: events }, (response) => {
         if (response?.success) {
           // alert("Ads blocked successfully!");
-          console.log('notified');
+          console.error('notified');
         } else {
           // alert("Failed to block ads. Make sure the content script is loaded.");
         }
@@ -172,7 +170,7 @@ const useHomeHook = () => {
   const handleExtensionState = (isActive) => {
     if (isExtension) {
       chrome.storage.local.set({ isActive: isActive }, function () {
-        console.log('Value is set.');
+        // console.log('Value is set.');
       });
       setIsActive(isActive);
     } else {
@@ -185,7 +183,7 @@ const useHomeHook = () => {
     try {
       handleChromeMessaging('remove');
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 

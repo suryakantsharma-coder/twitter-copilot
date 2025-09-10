@@ -20,7 +20,6 @@ const useSlowMotionPlaybackHook = () => {
           chrome.storage.local.get(['smplayback'], (data) => {
             if (data.smplayback) {
               const state = JSON.parse(data.smplayback);
-              console.log({ state });
               setOptions(state);
             } else {
               setLocalOptions({
@@ -31,7 +30,7 @@ const useSlowMotionPlaybackHook = () => {
           });
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -40,10 +39,10 @@ const useSlowMotionPlaybackHook = () => {
       if (test) localStorage.setItem('smplayback', JSON.stringify(options));
       else
         chrome.storage.local.set({ smplayback: JSON.stringify(options) }, function () {
-          console.log('smplayback added');
+          // console.log('smplayback added');
         });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert('failed to save smplayback');
     }
   }

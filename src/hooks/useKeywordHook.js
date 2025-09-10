@@ -17,7 +17,7 @@ const useKeywordHook = () => {
       if (keywords?.length <= 10) {
         if (isExtension) {
           chrome.storage.local.set({ keywords: JSON.stringify(keywords) }, function () {
-            console.log('keword added');
+            // console.log('keword added');
           });
         } else {
           localStorage.setItem('keywords', JSON.stringify(keywords));
@@ -26,7 +26,7 @@ const useKeywordHook = () => {
         alert('You can only use 10 keywords for now.');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert('failed to save keyword');
     }
   };
@@ -36,7 +36,7 @@ const useKeywordHook = () => {
       if (keywords?.length <= 10) {
         if (isExtension) {
           chrome.storage.local.set({ keywords: JSON.stringify(keywords) }, function () {
-            console.log('keword array list added');
+            // console.log('keword array list added');
           });
         } else {
           localStorage.setItem('keywords', JSON.stringify(keywords));
@@ -45,7 +45,7 @@ const useKeywordHook = () => {
         alert('You can only use 10 keywords for now.');
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert('failed to save keyword');
     }
   };
@@ -54,17 +54,14 @@ const useKeywordHook = () => {
     try {
       if (isExtension) {
         chrome.storage.local.get(['keywords'], function (result) {
-          console.log('keword array list added');
-          console.log({ keywords: JSON.parse(result?.keywords) });
           setListOfKeywords(JSON.parse(result?.keywords));
         });
       } else {
         const keywords = localStorage.getItem('keywords');
-        console.log({ keywords: JSON.parse(keywords) });
         setListOfKeywords(JSON.parse(keywords));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -85,11 +82,10 @@ const useKeywordHook = () => {
     try {
       const keywords = listOfKeywords;
       const updatedData = keywords?.splice(index, 1);
-      console.log({ keywords, updatedData });
       setKeyWordListArray(keywords);
       setIsAddredFeedback(!isAddedFeedback);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 

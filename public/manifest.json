@@ -26,7 +26,7 @@
   "content_scripts": [
     {
       "matches": ["https://youtube.com/*", "https://*.youtube.com/*"],
-      "js": ["libs/html2canvas.min.js", "content.js"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ]

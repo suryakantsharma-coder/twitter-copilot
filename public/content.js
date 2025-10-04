@@ -417,9 +417,3 @@ function postTweet(text) {
   }, 200);
   setTimeout(() => clearInterval(interval), 5000);
 }
-
-setTimeout(() => {
-  const tweet = 'DEMO Tweet';
-  console.log({ tweet });
-  postTweet(tweet);
-}, 5000);
